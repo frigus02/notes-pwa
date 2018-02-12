@@ -16,9 +16,17 @@ class NotesApp extends NotesBaseElement {
 		return html`
 			<style>
 				:host {
-					--pink: #f44289;
+					--primary-color: #5d4037;
+					--primary-color-light: #8b6b61;
+					--primary-color-dark: #321911;
+					--secondary-color: #2196f3;
+					--secondary-color-light: #6ec6ff;
+					--secondary-color-dark: #0069c0;
+					--primary-text-color: #ffffff;
+					--secondary-text-color: #000000;
 					display: block;
-					background: var(--pink);
+					background: var(--primary-color);
+					color: var(--primary-text-color);
 				}
 			</style>
 

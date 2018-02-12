@@ -18,6 +18,12 @@ module.exports = {
             {
                 from: '../node_modules/@webcomponents/webcomponentsjs/webcomponents-*.js',
                 to: 'node_modules/'
+            },
+            {
+                from: 'images/*.png'
+            },
+            {
+                from: 'manifest.webmanifest'
             }
         ])
     ]
