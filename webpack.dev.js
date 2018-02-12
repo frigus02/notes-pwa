@@ -12,5 +12,5 @@ module.exports = merge(common, {
         open: true,
         port: 8080
     },
-    devtool: 'source-map'
+    devtool: 'eval-source-map'
 });

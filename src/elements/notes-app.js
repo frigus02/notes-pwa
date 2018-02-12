@@ -1,7 +1,10 @@
-import { LitElement } from '@polymer/lit-element/lit-element.js'
-import { html } from 'lit-html/lib/lit-extended.js';
+import NotesBaseElement, { html } from './notes-base-element.js';
 
-class NotesApp extends LitElement {
+class NotesApp extends NotesBaseElement {
+	static get is() {
+		return 'notes-app';
+	}
+
 	static get properties() {
 		return {
 			picture: String,
@@ -14,13 +17,7 @@ class NotesApp extends LitElement {
 			<style>
 				:host {
 					--pink: #f44289;
-
-					position: absolute;
-					top: 0;
-					left: 0;
-					right: 0;
-					bottom: 0;
-
+					display: block;
 					background: var(--pink);
 				}
 			</style>

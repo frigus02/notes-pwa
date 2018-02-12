@@ -13,7 +13,7 @@
         document.addEventListener('WebComponentsReady', function () {
             const script = document.createElement('script');
             script.src = '<%= htmlWebpackPlugin.files.js[0] %>';
-            document.body.appendChild(script);
+            document.head.appendChild(script);
         }, { once: true });
     </script>
 </body>
