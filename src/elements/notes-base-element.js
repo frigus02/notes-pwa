@@ -2,6 +2,7 @@ import { PropertiesMixin } from '@polymer/polymer/lib/mixins/properties-mixin.js
 import { render } from 'lit-html/lib/shady-render.js';
 
 export { html } from 'lit-html/lib/lit-extended.js';
+export { repeat } from 'lit-html/lib/repeat.js';
 
 class NotesBaseElement extends PropertiesMixin(HTMLElement) {
     ready() {

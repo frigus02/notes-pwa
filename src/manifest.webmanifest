@@ -1,5 +1,6 @@
 {
-    "name": "Notes",
+    "name": "Notes PWA",
+    "short_name": "Notes",
     "start_url": "/",
     "display": "standalone",
     "background_color": "#fff",
