@@ -35,6 +35,11 @@ class NotesList extends NotesBaseElement {
 					text-decoration: none;
 				}
 
+				.note-item a:hover,
+				.note-item a:active {
+					background: rgba(0, 0, 0, 0.1);
+				}
+
 				.note-item h2 {
 					margin: 0;
 					font-size: 16px;

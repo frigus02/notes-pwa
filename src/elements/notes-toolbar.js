@@ -16,14 +16,20 @@ class NotesToolbar extends NotesBaseElement {
 			<style>
 				:host {
 					display: block;
+					height: 59px;
 				}
 
 				header {
 					background: var(--primary-color);
-					color: var(--primary-text-color-on-dark);
-					padding: 16px;
 					box-shadow: 0 3px 3px var(--divider-color);
-					margin-bottom: 3px;
+					box-sizing: border-box;
+					color: var(--primary-text-color-on-dark);
+					height: 56px;
+					line-height: 24px;
+					padding: 16px;
+					position: fixed;
+					top: 0;
+					width: 100%;
 				}
 
 				h1 {

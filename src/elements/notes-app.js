@@ -6,7 +6,10 @@ const notes = [
 	{ id: 1, title: 'Essen', summary: '- Spaghetti Napoli', modified: '2 days ago' },
 	{ id: 2, title: 'Wi-Fi', summary: 'My Net', modified: '20 days ago' },
 	{ id: 3, title: 'To-do', summary: 'Nothing', modified: '21 days ago' },
-	{ id: 4, title: 'Lifehacks', summary: '...', modified: '30 days ago' }
+	{ id: 4, title: 'Lifehacks', summary: '...', modified: '30 days ago' },
+	{ id: 5, title: 'Lifehacks', summary: '...', modified: '30 days ago' },
+	{ id: 6, title: 'Lifehacks', summary: '...', modified: '30 days ago' },
+	{ id: 7, title: 'Lifehacks', summary: '...', modified: '30 days ago' }
 ];
 
 class NotesApp extends NotesBaseElement {
