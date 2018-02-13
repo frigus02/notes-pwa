@@ -1,4 +1,4 @@
-import { html } from '../elements/notes-base-element.js';
+import { html } from '../notes-base-element.js';
 
 const cssColors = html`
     <style>

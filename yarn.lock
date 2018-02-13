@@ -2468,6 +2468,10 @@ nanomatch@^1.2.5:
     snapdragon "^0.8.1"
     to-regex "^3.0.1"
 
+navigo@^7.1.1:
+  version "7.1.1"
+  resolved "https://registry.yarnpkg.com/navigo/-/navigo-7.1.1.tgz#c7e3eb4398125769f3bc6b7c924d8139da466038"
+
 ncname@1.0.x:
   version "1.0.0"
   resolved "https://registry.yarnpkg.com/ncname/-/ncname-1.0.0.tgz#5b57ad18b1ca092864ef62b0b1ed8194f383b71c"
