@@ -4,7 +4,10 @@ const HtmlWebpackPlugin = require('html-webpack-plugin');
 
 module.exports = {
     context: path.join(__dirname, 'src'),
-    entry: './index.js',
+    entry: [
+        './index.js',
+        './elements/notes-toolbar.js'
+    ],
     output: {
         filename: 'bundle-[hash].js',
         path: path.resolve(__dirname, 'dist')
