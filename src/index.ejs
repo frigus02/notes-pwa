@@ -22,6 +22,14 @@
             script.src = '<%= htmlWebpackPlugin.files.js[0] %>';
             document.head.appendChild(script);
         }, { once: true });
+
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', function () {
+                navigator.serviceWorker.register('/sw.js').catch(function (err) {
+                    console.warn('ServiceWorker registration failed:', err);
+                });
+            });
+        }
     </script>
 </body>
 </html>

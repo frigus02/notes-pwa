@@ -18,7 +18,7 @@
     "webpack-merge": "^4.1.1"
   },
   "scripts": {
-    "start": "webpack-dev-server --config webpack.dev.js --color --progress",
-    "build": "webpack --config webpack.prod.js --color --progress"
+    "start": "webpack-dev-server --progress --config webpack.dev.js",
+    "build": "webpack --progress --config webpack.prod.js"
   }
 }

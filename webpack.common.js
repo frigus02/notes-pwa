@@ -1,4 +1,7 @@
+'use strict';
+
 const path = require('path');
+
 const CopyWebpackPlugin = require('copy-webpack-plugin');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 
@@ -9,7 +12,7 @@ module.exports = {
         './elements/notes-toolbar.js'
     ],
     output: {
-        filename: 'bundle-[hash].js',
+        filename: 'bundle.js',
         path: path.resolve(__dirname, 'dist')
     },
     plugins: [
@@ -27,6 +30,9 @@ module.exports = {
             },
             {
                 from: 'manifest.webmanifest'
+            },
+            {
+                from: 'sw.js'
             }
         ])
     ]

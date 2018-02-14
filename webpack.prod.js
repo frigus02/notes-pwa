@@ -7,6 +7,9 @@ const webpack = require('webpack');
 const common = require('./webpack.common.js');
 
 module.exports = merge(common, {
+    output: {
+        filename: 'bundle-[hash].js'
+    },
     plugins: [
         new UglifyJsPlugin(),
         new webpack.optimize.ModuleConcatenationPlugin(),
