@@ -4,6 +4,7 @@ const path = require('path');
 
 const CopyWebpackPlugin = require('copy-webpack-plugin');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
+const ServiceWorkerPlugin = require('./build/service-worker-plugin');
 
 module.exports = {
     context: path.join(__dirname, 'src'),
@@ -30,10 +31,10 @@ module.exports = {
             },
             {
                 from: 'manifest.webmanifest'
-            },
-            {
-                from: 'sw.js'
             }
-        ])
+        ]),
+        new ServiceWorkerPlugin({
+            filename: 'sw.js'
+        })
     ]
 };

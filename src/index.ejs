@@ -17,16 +17,18 @@
 
     <script src="node_modules/@webcomponents/webcomponentsjs/webcomponents-loader.js"></script>
     <script>
-        document.addEventListener('WebComponentsReady', function () {
+        document.addEventListener('WebComponentsReady', () => {
             const script = document.createElement('script');
             script.src = '<%= htmlWebpackPlugin.files.js[0] %>';
             document.head.appendChild(script);
         }, { once: true });
 
         if ('serviceWorker' in navigator) {
-            window.addEventListener('load', function () {
-                navigator.serviceWorker.register('/sw.js').catch(function (err) {
-                    console.warn('ServiceWorker registration failed:', err);
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('/sw.js').then(registration => {
+                    console.log('Service worker registered.');
+                }, error => {
+                    console.warn('Service worker could not be registered:', error);
                 });
             });
         }
