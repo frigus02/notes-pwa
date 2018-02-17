@@ -15,9 +15,14 @@ class NotesPageNote extends NotesBaseElement {
 	}
 
 	render({ dataState }) {
-		const noteId = parseInt(dataState.noteId, 10);
-		const noteDetails = storage.getNote(noteId).then(note =>
-			html`<notes-details dataNote="${note}"></notes-details>`);
+		const noteDetails = storage.getNote(dataState.noteId).then(note => {
+			const onChange = async e => {
+				const updatedNote = e.detail;
+				await storage.updateNote(updatedNote);
+			};
+
+			return html`<notes-details dataNote="${note}" on-change="${onChange}"></notes-details>`;
+		});
 
 		return html`
 			<style>
@@ -26,7 +31,7 @@ class NotesPageNote extends NotesBaseElement {
 				}
 			</style>
 
-			<notes-toolbar dataTitle="Notes"></notes-toolbar>
+			<notes-toolbar>Notes</notes-toolbar>
 			${until(noteDetails, 'Loading...')}
 		`;
 	}

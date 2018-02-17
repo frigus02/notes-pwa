@@ -1,14 +1,14 @@
+import { MS_DAY } from './format.js';
+
 const NOTES = [
-    { id: 1, title: 'Essen', summary: '- Spaghetti Napoli', modified: '2 days ago' },
-    { id: 2, title: 'Wi-Fi', summary: 'My Net', modified: '20 days ago' },
-    { id: 3, title: 'To-do', summary: 'Nothing', modified: '21 days ago' },
-    { id: 4, title: 'Lifehacks', summary: '...', modified: '30 days ago' },
-    { id: 5, title: 'Lifehacks', summary: '...', modified: '30 days ago' },
-    { id: 6, title: 'Lifehacks', summary: '...', modified: '30 days ago' },
-    { id: 7, title: 'Lifehacks', summary: '...', modified: '30 days ago' }
+    { title: 'Hello', body: 'Looks like this is your first note.' }
 ];
 
 class Storage extends EventTarget {
+    static newId() {
+        return (function b(a) { return a ? (a ^ Math.random() * 16 >> a / 4).toString(16) : ([1e7] + -1e3 + -4e3 + -8e3 + -1e11).replace(/[018]/g, b) })();
+    }
+
     static toPromise(request) {
         return new Promise((resolve, reject) => {
             request.onerror = event => {
@@ -20,14 +20,6 @@ class Storage extends EventTarget {
         });
     }
 
-    static getAll(objectStore) {
-        return Storage.toPromise(objectStore.getAll());
-    }
-
-    static get(objectStore, id) {
-        return Storage.toPromise(objectStore.get(id));
-    }
-
     _openDatabase() {
         if (!this._dbPromise) {
             const request = window.indexedDB.open('notes', 1);
@@ -36,9 +28,14 @@ class Storage extends EventTarget {
             request.onupgradeneeded = event => {
                 const db = event.target.result;
                 const objectStore = db.createObjectStore('notes', { keyPath: 'id' });
+                objectStore.createIndex('modified', 'modified');
                 objectStore.transaction.oncomplete = () => {
                     const notesObjectStore = db.transaction('notes', 'readwrite').objectStore('notes');
-                    NOTES.forEach(note => notesObjectStore.add(note));
+                    NOTES.forEach(note => {
+                        note.id = Storage.newId();
+                        note.modified = new Date();
+                        notesObjectStore.add(note);
+                    });
                 };
             };
         }
@@ -62,15 +59,36 @@ class Storage extends EventTarget {
         });
     }
 
+    createNote() {
+        const note = {
+            id: Storage.newId(),
+            title: 'New note',
+            body: '',
+            modified: new Date()
+        };
+        return this._transaction(['notes'], 'readwrite', objectStores => {
+            objectStores[0].add(note);
+            return note;
+        });
+    }
+
     getNotes() {
         return this._transaction(['notes'], 'readonly', objectStores => {
-            return Storage.getAll(objectStores[0]);
+            const modifiedIndex = objectStores[0].index('modified');
+            return Storage.toPromise(modifiedIndex.getAll()).then(notes => notes.reverse());
         });
     }
 
     getNote(id) {
         return this._transaction(['notes'], 'readonly', objectStores => {
-            return Storage.get(objectStores[0], id);
+            return Storage.toPromise(objectStores[0].get(id));
+        });
+    }
+
+    updateNote(note) {
+        note.modified = new Date();
+        return this._transaction(['notes'], 'readwrite', objectStores => {
+            objectStores[0].put(note);
         });
     }
 }

@@ -5,13 +5,7 @@ class NotesToolbar extends NotesBaseElement {
 		return 'notes-toolbar';
 	}
 
-	static get properties() {
-		return {
-			dataTitle: String
-		};
-	}
-
-	render({ dataTitle }) {
+	render() {
 		return html`
 			<style>
 				:host {
@@ -30,16 +24,25 @@ class NotesToolbar extends NotesBaseElement {
 					position: fixed;
 					top: 0;
 					width: 100%;
+					display: flex;
+					justify-content: space-between;
 				}
 
 				h1 {
 					margin: 0;
 					font-size: 20px;
 				}
+
+				.actions {
+
+				}
 			</style>
 
 			<header>
-				<h1>${dataTitle}</h1>
+				<h1><slot></slot></h1>
+				<div class="actions">
+					<slot name="actions"></slot>
+				</div>
 			</header>
 		`;
 	}

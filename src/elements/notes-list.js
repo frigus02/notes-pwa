@@ -1,4 +1,5 @@
 import NotesBaseElement, { html, repeat } from './notes-base-element.js';
+import { timeAgo } from './utils/format.js';
 
 class NotesList extends NotesBaseElement {
 	static get is() {
@@ -50,6 +51,14 @@ class NotesList extends NotesBaseElement {
 				.note-item p {
 					margin: 0;
 					color: var(--secondary-text-color);
+					display: flex;
+					white-space: nowrap;
+					justify-content: space-between;
+				}
+
+				.note-item p .summary {
+					overflow: hidden;
+					text-overflow: ellipsis;
 				}
 			</style>
 
@@ -58,7 +67,10 @@ class NotesList extends NotesBaseElement {
 					<li class="note-item">
 						<a href="/note/${note.id}">
 							<h2>${note.title}</h2>
-							<p>${note.summary} - ${note.modified}</p>
+							<p>
+								<span class="summary">${note.body}</span>
+								<span>${timeAgo(note.modified)}</span>
+							</p>
 						</a>
                     </li>
                 `)}
