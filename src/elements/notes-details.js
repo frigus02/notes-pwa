@@ -53,6 +53,7 @@ class NotesDetails extends NotesBaseElement {
 
             <h2>
 				<input
+					aria-label="Note title"
 					type="text"
 					value="${dataNote.title}"
 					on-change="${e => this._onChange({ title: e.target.value })}">
@@ -61,6 +62,7 @@ class NotesDetails extends NotesBaseElement {
 				Modified: ${timeAgo(dataNote.modified)}
 			</div>
 			<textarea
+				aria-label="Note content"
 				on-change="${e => this._onChange({ body: e.target.value })}"
 				>${dataNote.body}</textarea>
 		`;
