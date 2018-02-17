@@ -12,6 +12,7 @@ class NotesDetails extends NotesBaseElement {
 	}
 
 	render({ dataNote }) {
+		if (!dataNote) return;
 		return html`
 			<style>
 				:host {

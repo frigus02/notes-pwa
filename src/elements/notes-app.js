@@ -2,16 +2,6 @@ import NotesBaseElement, { html, dynamicElement, until } from './notes-base-elem
 import { cssColors } from './utils/colors.js';
 import router from './utils/router.js';
 
-const notes = [
-	{ id: 1, title: 'Essen', summary: '- Spaghetti Napoli', modified: '2 days ago' },
-	{ id: 2, title: 'Wi-Fi', summary: 'My Net', modified: '20 days ago' },
-	{ id: 3, title: 'To-do', summary: 'Nothing', modified: '21 days ago' },
-	{ id: 4, title: 'Lifehacks', summary: '...', modified: '30 days ago' },
-	{ id: 5, title: 'Lifehacks', summary: '...', modified: '30 days ago' },
-	{ id: 6, title: 'Lifehacks', summary: '...', modified: '30 days ago' },
-	{ id: 7, title: 'Lifehacks', summary: '...', modified: '30 days ago' }
-];
-
 class NotesApp extends NotesBaseElement {
 	static get is() {
 		return 'notes-app';
@@ -47,11 +37,10 @@ class NotesApp extends NotesBaseElement {
 	}
 
 	render({ dataPage, dataPageParams }) {
-		const state = Object.assign(
-			{ notes },
-			dataPageParams);
 		const page = import(`./notes-page-${dataPage}.js`).then(() =>
-			dynamicElement(`notes-page-${dataPage}`, { dataState: state }));
+			dynamicElement(`notes-page-${dataPage}`, {
+				dataState: Object.assign({}, dataPageParams)
+			}));
 
 		return html`
 			 ${cssColors}
@@ -61,7 +50,7 @@ class NotesApp extends NotesBaseElement {
 				}
 			</style>
 
-			${until(page, html`Loading...`)}
+			${until(page, 'Loading...')}
 		`;
 	}
 }

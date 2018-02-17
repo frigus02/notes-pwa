@@ -1,6 +1,7 @@
-import NotesBaseElement, { html } from './notes-base-element.js';
+import NotesBaseElement, { html, until } from './notes-base-element.js';
 import './notes-list.js';
 import './notes-toolbar.js';
+import storage from './utils/storage.js';
 
 class NotesPageList extends NotesBaseElement {
 	static get is() {
@@ -9,11 +10,14 @@ class NotesPageList extends NotesBaseElement {
 
 	static get properties() {
 		return {
-			dataState: Array
+			dataState: Object
 		};
 	}
 
-	render({ dataState }) {
+	render() {
+		const notesList = storage.getNotes().then(notes =>
+			html`<notes-list dataNotes="${notes}"></notes-list>`);
+
 		return html`
 			<style>
 				:host {
@@ -22,7 +26,7 @@ class NotesPageList extends NotesBaseElement {
 			</style>
 
 			<notes-toolbar dataTitle="${"Notes"}"></notes-toolbar>
-			<notes-list dataNotes="${dataState.notes}"></notes-list>
+			${until(notesList, 'Loading...')}
 		`;
 	}
 }

@@ -1,6 +1,7 @@
-import NotesBaseElement, { html } from './notes-base-element.js';
+import NotesBaseElement, { html, until } from './notes-base-element.js';
 import './notes-details.js';
 import './notes-toolbar.js';
+import storage from './utils/storage.js';
 
 class NotesPageNote extends NotesBaseElement {
 	static get is() {
@@ -15,7 +16,9 @@ class NotesPageNote extends NotesBaseElement {
 
 	render({ dataState }) {
 		const noteId = parseInt(dataState.noteId, 10);
-		const note = dataState.notes.find(n => n.id === noteId);
+		const noteDetails = storage.getNote(noteId).then(note =>
+			html`<notes-details dataNote="${note}"></notes-details>`);
+
 		return html`
 			<style>
 				:host {
@@ -23,8 +26,8 @@ class NotesPageNote extends NotesBaseElement {
 				}
 			</style>
 
-			<notes-toolbar dataTitle="${note.title}"></notes-toolbar>
-			<notes-details dataNote="${note}"></notes-details>
+			<notes-toolbar dataTitle="Notes"></notes-toolbar>
+			${until(noteDetails, 'Loading...')}
 		`;
 	}
 }
