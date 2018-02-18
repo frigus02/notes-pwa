@@ -1,6 +1,7 @@
 import NotesBaseElement, { html } from './notes-base-element.js';
 import './notes-markdown-editor.js';
-import { timeAgo } from './utils/format.js';
+
+import { timeAgo } from '../shared/format.js';
 
 class NotesDetails extends NotesBaseElement {
 	static get is() {

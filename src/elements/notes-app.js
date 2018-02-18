@@ -43,7 +43,7 @@ class NotesApp extends NotesBaseElement {
 			}));
 
 		return html`
-			 ${cssColors}
+			${cssColors}
 			<style>
 				:host {
 					display: block;

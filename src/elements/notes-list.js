@@ -1,5 +1,6 @@
 import NotesBaseElement, { html, repeat } from './notes-base-element.js';
-import { timeAgo } from './utils/format.js';
+
+import { timeAgo } from '../shared/format.js';
 
 class NotesList extends NotesBaseElement {
 	static get is() {

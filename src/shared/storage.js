@@ -1,14 +1,11 @@
 import { MS_DAY } from './format.js';
+import { newId } from './id.js';
 
 const NOTES = [
     { title: 'Hello', body: 'Looks like this is your first note.' }
 ];
 
 class Storage extends EventTarget {
-    static newId() {
-        return (function b(a) { return a ? (a ^ Math.random() * 16 >> a / 4).toString(16) : ([1e7] + -1e3 + -4e3 + -8e3 + -1e11).replace(/[018]/g, b) })();
-    }
-
     static toPromise(request) {
         return new Promise((resolve, reject) => {
             request.onerror = event => {
@@ -22,7 +19,7 @@ class Storage extends EventTarget {
 
     _openDatabase() {
         if (!this._dbPromise) {
-            const request = window.indexedDB.open('notes', 1);
+            const request = indexedDB.open('notes', 1);
             this._dbPromise = Storage.toPromise(request);
 
             request.onupgradeneeded = event => {
@@ -32,7 +29,7 @@ class Storage extends EventTarget {
                 objectStore.transaction.oncomplete = () => {
                     const notesObjectStore = db.transaction('notes', 'readwrite').objectStore('notes');
                     NOTES.forEach(note => {
-                        note.id = Storage.newId();
+                        note.id = newId();
                         note.modified = new Date();
                         notesObjectStore.add(note);
                     });
@@ -61,7 +58,7 @@ class Storage extends EventTarget {
 
     createNote() {
         const note = {
-            id: Storage.newId(),
+            id: newId(),
             title: 'New note',
             body: '',
             modified: new Date()

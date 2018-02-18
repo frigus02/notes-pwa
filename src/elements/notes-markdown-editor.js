@@ -1,13 +1,7 @@
-import marked from 'marked/lib/marked.js';
 import htmlToMarkdown from './utils/html-to-markdown.js';
+import { markdownToHtml } from './utils/worker.js';
 
-marked.setOptions({
-    gfm: true,
-    tables: false,
-    breaks: true
-});
-
-class NotesMarkdwnEditor extends HTMLElement {
+class NotesMarkdownEditor extends HTMLElement {
     static get is() {
         return 'notes-markdown-editor';
     }
@@ -28,16 +22,18 @@ class NotesMarkdwnEditor extends HTMLElement {
         if (this._value !== value) {
             this._value = value;
             if (this._div) {
-                this._div.innerHTML = marked(this._value);
+                markdownToHtml(this._value).then(html => {
+                    this._div.innerHTML = html;
+                });
             }
         }
     }
 
-    _onDivChange() {
+    async _onDivChange() {
         const result = htmlToMarkdown(this._div);
         this._value = result.markdown;
         if (result.removedInvalidNodes) {
-            this._div.innerHTML = marked(this._value);
+            this._div.innerHTML = await markdownToHtml(this._value);
         }
 
         this.dispatchEvent(new CustomEvent('change', {
@@ -90,8 +86,11 @@ class NotesMarkdwnEditor extends HTMLElement {
             this.attachShadow({ mode: 'open' });
             this._div = document.createElement('div');
             this._div.setAttribute('contenteditable', 'true');
-            this._div.innerHTML = marked(this._value);
             this.shadowRoot.appendChild(this._div);
+
+            markdownToHtml(this._value).then(html => {
+                this._div.innerHTML = html;
+            });
         }
 
         this._div.addEventListener('input', this._onDivChange);
@@ -106,4 +105,4 @@ class NotesMarkdwnEditor extends HTMLElement {
     }
 }
 
-customElements.define(NotesMarkdwnEditor.is, NotesMarkdwnEditor);
+customElements.define(NotesMarkdownEditor.is, NotesMarkdownEditor);

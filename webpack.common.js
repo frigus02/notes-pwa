@@ -9,7 +9,7 @@ const ServiceWorkerPlugin = require('./build/service-worker-plugin');
 module.exports = {
     context: path.join(__dirname, 'src'),
     entry: [
-        './index.js',
+        './elements/index.js',
         './elements/notes-toolbar.js'
     ],
     output: {

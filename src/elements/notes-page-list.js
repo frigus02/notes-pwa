@@ -2,8 +2,9 @@ import NotesBaseElement, { html, until } from './notes-base-element.js';
 import './notes-list.js';
 import './notes-toolbar.js';
 import router from './utils/router.js';
-import storage from './utils/storage.js';
 import sync from './utils/sync.js';
+
+import storage from '../shared/storage.js';
 
 class NotesPageList extends NotesBaseElement {
 	static get is() {
