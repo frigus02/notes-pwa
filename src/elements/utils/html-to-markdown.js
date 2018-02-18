@@ -1,3 +1,5 @@
+// TODO: Use https://github.com/domchristie/turndown instead?
+
 const SKIP_NODE_NAMES = [
     'SPAN'
 ];

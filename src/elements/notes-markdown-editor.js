@@ -17,6 +17,7 @@ class NotesMarkdwnEditor extends HTMLElement {
         this._value = '';
         this._onDivChange = this._onDivChange.bind(this);
         this._onDivFocus = this._onDivFocus.bind(this);
+        this._onDivKeydown = this._onDivKeydown.bind(this);
     }
 
     get value() {
@@ -32,11 +33,7 @@ class NotesMarkdwnEditor extends HTMLElement {
         }
     }
 
-    _onDivFocus() {
-        window.document.execCommand('defaultParagraphSeparator', false, 'p');
-    }
-
-    _onDivChange(e) {
+    _onDivChange() {
         const result = htmlToMarkdown(this._div);
         this._value = result.markdown;
         if (result.removedInvalidNodes) {
@@ -46,6 +43,44 @@ class NotesMarkdwnEditor extends HTMLElement {
         this.dispatchEvent(new CustomEvent('change', {
             detail: this._value
         }));
+    }
+
+    _onDivFocus() {
+        window.document.execCommand('defaultParagraphSeparator', false, 'p');
+    }
+
+    _onDivKeydown(e) {
+        let preventDefault = true;
+        if (e.key === 'b' && e.ctrlKey) {
+            window.document.execCommand('bold');
+        } else if (e.key === 'i' && e.ctrlKey) {
+            window.document.execCommand('italic');
+        } else if (e.key === 'k' && e.ctrlKey) {
+            const link = prompt('Enter URL');
+            if (link) {
+                window.document.execCommand('createLink', false, link);
+            } else {
+                window.document.execCommand('unlink');
+            }
+        } else if (e.code === 'Digit1' && e.ctrlKey && e.altKey) {
+            window.document.execCommand('formatBlock', false, 'H1');
+        } else if (e.code === 'Digit2' && e.ctrlKey && e.altKey) {
+            window.document.execCommand('formatBlock', false, 'H2');
+        } else if (e.code === 'Digit3' && e.ctrlKey && e.altKey) {
+            window.document.execCommand('formatBlock', false, 'H3');
+        } else if (e.code === 'Digit7' && e.ctrlKey && e.shiftKey) {
+            window.document.execCommand('insertOrderedList');
+        } else if (e.code === 'Digit8' && e.ctrlKey && e.shiftKey) {
+            window.document.execCommand('insertUnorderedList');
+        } else if ((e.code === 'Digit0' || e.key === '\\') && e.ctrlKey && e.altKey) {
+            window.document.execCommand('removeFormat');
+        } else {
+            preventDefault = false;
+        }
+
+        if (preventDefault) {
+            e.preventDefault();
+        }
     }
 
     connectedCallback() {
@@ -61,11 +96,13 @@ class NotesMarkdwnEditor extends HTMLElement {
 
         this._div.addEventListener('input', this._onDivChange);
         this._div.addEventListener('focus', this._onDivFocus);
+        this._div.addEventListener('keydown', this._onDivKeydown);
     }
 
     disconnectedCallback() {
         this._div.removeEventListener('input', this._onDivChange);
         this._div.removeEventListener('focus', this._onDivFocus);
+        this._div.removeEventListener('keydown', this._onDivKeydown);
     }
 }
 
