@@ -1,6 +1,7 @@
 import NotesBaseElement, { html, until } from './notes-base-element.js';
 import './notes-details.js';
 import './notes-toolbar.js';
+import router from './utils/router.js';
 import storage from './utils/storage.js';
 
 class NotesPageNote extends NotesBaseElement {
@@ -12,6 +13,16 @@ class NotesPageNote extends NotesBaseElement {
 		return {
 			dataState: Object
 		};
+	}
+
+	constructor() {
+		super();
+		this._deleteNote = this._deleteNote.bind(this);
+	}
+
+	async _deleteNote() {
+		await storage.deleteNote(this.dataState.noteId);
+		router.navigate('/');
 	}
 
 	render({ dataState }) {
@@ -31,7 +42,10 @@ class NotesPageNote extends NotesBaseElement {
 				}
 			</style>
 
-			<notes-toolbar>Notes</notes-toolbar>
+			<notes-toolbar>
+				Notes
+				<button slot="actions" on-click="${this._deleteNote}">Delete</button>
+			</notes-toolbar>
 			${until(noteDetails, 'Loading...')}
 		`;
 	}

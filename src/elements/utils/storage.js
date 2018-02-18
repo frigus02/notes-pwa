@@ -91,6 +91,12 @@ class Storage extends EventTarget {
             objectStores[0].put(note);
         });
     }
+
+    deleteNote(id) {
+        return this._transaction(['notes'], 'readwrite', objectStores => {
+            objectStores[0].delete(id);
+        });
+    }
 }
 
 const instance = new Storage();
