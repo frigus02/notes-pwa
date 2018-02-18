@@ -429,6 +429,13 @@ buffer@^4.3.0:
     ieee754 "^1.1.4"
     isarray "^1.0.0"
 
+buffer@^5.0.8:
+  version "5.1.0"
+  resolved "https://registry.yarnpkg.com/buffer/-/buffer-5.1.0.tgz#c913e43678c7cb7c8bd16afbcddb6c5505e8f9fe"
+  dependencies:
+    base64-js "^1.0.2"
+    ieee754 "^1.1.4"
+
 builtin-modules@^1.0.0:
   version "1.1.1"
   resolved "https://registry.yarnpkg.com/builtin-modules/-/builtin-modules-1.1.1.tgz#270f076c5a72c02f5b65a47df94c5fe3a278892f"
@@ -984,6 +991,12 @@ domutils@1.5.1:
   dependencies:
     dom-serializer "0"
     domelementtype "1"
+
+dropbox@^3.0.4:
+  version "3.0.4"
+  resolved "https://registry.yarnpkg.com/dropbox/-/dropbox-3.0.4.tgz#0d532d85ef6e76cb96914f5cbcccbbe9b40e9d75"
+  dependencies:
+    buffer "^5.0.8"
 
 duplexify@^3.4.2, duplexify@^3.5.3:
   version "3.5.3"

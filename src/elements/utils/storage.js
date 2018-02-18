@@ -72,10 +72,15 @@ class Storage extends EventTarget {
         });
     }
 
-    getNotes() {
-        return this._transaction(['notes'], 'readonly', objectStores => {
+    getNotes(includeDeleted) {
+        return this._transaction(['notes'], 'readonly', async objectStores => {
             const modifiedIndex = objectStores[0].index('modified');
-            return Storage.toPromise(modifiedIndex.getAll()).then(notes => notes.reverse());
+            let notes = await Storage.toPromise(modifiedIndex.getAll());
+            if (!includeDeleted) {
+                notes = notes.filter(note => !note._deleted);
+            }
+
+            return notes.reverse();
         });
     }
 
@@ -85,16 +90,28 @@ class Storage extends EventTarget {
         });
     }
 
-    updateNote(note) {
+    updateNote(note, setSyncDate) {
         note.modified = new Date();
+        if (setSyncDate) {
+            note.sync.lastSync = note.modified;
+        }
+
         return this._transaction(['notes'], 'readwrite', objectStores => {
             objectStores[0].put(note);
         });
     }
 
-    deleteNote(id) {
-        return this._transaction(['notes'], 'readwrite', objectStores => {
-            objectStores[0].delete(id);
+    deleteNote(id, force) {
+        return this._transaction(['notes'], 'readwrite', async objectStores => {
+            if (force) {
+                objectStores[0].delete(id);
+            } else {
+                objectStores[0].get(id).onsuccess = e => {
+                    const note = e.target.result;
+                    note._deleted = true;
+                    objectStores[0].put(note);
+                };
+            }
         });
     }
 }
