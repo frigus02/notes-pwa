@@ -1,4 +1,5 @@
 import NotesBaseElement, { html } from './notes-base-element.js';
+import './notes-markdown-editor.js';
 import { timeAgo } from './utils/format.js';
 
 class NotesDetails extends NotesBaseElement {
@@ -61,10 +62,10 @@ class NotesDetails extends NotesBaseElement {
 			<div class="metadata">
 				Modified: ${timeAgo(dataNote.modified)}
 			</div>
-			<textarea
+			<notes-markdown-editor
 				aria-label="Note content"
-				on-change="${e => this._onChange({ body: e.target.value })}"
-				>${dataNote.body}</textarea>
+				value="${dataNote.body}"
+				on-change="${e => this._onChange({ body: e.target.value })}"></notes-markdown-editor>
 		`;
 	}
 }
