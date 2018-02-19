@@ -23,6 +23,13 @@ class NotesPageList extends NotesBaseElement {
 		this._syncNotes = this._syncNotes.bind(this);
 	}
 
+	connectedCallback() {
+		super.connectedCallback();
+		if (sync.continueSync()) {
+			this._syncNotes();
+		}
+	}
+
 	async _createNote() {
 		const note = await storage.createNote();
 		router.navigate(`/note/${note.id}`);
@@ -30,10 +37,6 @@ class NotesPageList extends NotesBaseElement {
 
 	async _syncNotes() {
 		try {
-			if (!sync.isAuthenticated()) {
-				await sync.authenticate();
-			}
-
 			await sync.sync();
 			alert('Done :-)');
 		} catch (e) {
