@@ -7,24 +7,30 @@ const readFile = promisify(fs.readFile);
 class ServiceWorkerPlugin {
     constructor(options) {
         this.options = options;
+        this.assets = new Set();
+    }
+
+    async _generateServiceWorker(file, newAssets) {
+        Object.keys(newAssets).forEach(asset => this.assets.add(asset));
+
+        const source = await readFile(file, { encoding: 'utf8' });
+        const cacheName = `const CACHE_NAME = ${JSON.stringify(Date.now().toString())};`;
+        const cacheUrls = `const CACHE_URLS = ${JSON.stringify([...this.assets])};`;
+        return `${cacheName}\n${cacheUrls}\n${source}`;
     }
 
     apply(compiler) {
-        const filename = path.resolve(compiler.context, this.options.filename);
-        const assets = new Set();
+        const resolvedFile = path.resolve(compiler.context, this.options.filename);
 
         compiler.plugin('emit', async (compilation, callback) => {
             try {
-                Object.keys(compilation.assets).forEach(asset => assets.add(asset));
-
-                const swSource = await readFile(filename, { encoding: 'utf8' });
-                const cacheName = `const CACHE_NAME = ${JSON.stringify(Date.now().toString())};`;
-                const cacheUrls = `const CACHE_URLS = ${JSON.stringify([...assets])};`;
-                const swGenerated = `${cacheName}\n${cacheUrls}\n${swSource}`;
+                const source = this.options.disableServiceWorker
+                    ? `console.log('Service worker is disabled.')`
+                    : await this._generateServiceWorker(resolvedFile, compilation.assets);
 
                 compilation.assets[this.options.filename] = {
-                    source: () => swGenerated,
-                    size: () => Buffer.byteLength(swGenerated, 'utf8'),
+                    source: () => source,
+                    size: () => Buffer.byteLength(source, 'utf8'),
                 };
 
                 callback();
@@ -34,7 +40,7 @@ class ServiceWorkerPlugin {
         });
 
         compiler.plugin('after-emit', (compilation, callback) => {
-            compilation.fileDependencies.push(filename);
+            compilation.fileDependencies.push(resolvedFile);
             callback();
         });
     }

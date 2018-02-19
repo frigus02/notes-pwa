@@ -34,7 +34,8 @@ module.exports = {
             }
         ]),
         new ServiceWorkerPlugin({
-            filename: 'sw.js'
+            filename: 'sw.js',
+            disableServiceWorker: !!process.env.DISABLE_SERVICE_WORKER
         })
     ]
 };
