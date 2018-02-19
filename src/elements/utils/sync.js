@@ -1,17 +1,17 @@
 import { sync } from './worker.js';
 
-function loadAccessToken() {
-    return localStorage.getItem('dbx-access-token');
-}
-
-function saveAccessToken(accessToken) {
-    localStorage.setItem('dbx-access-token', accessToken);
-}
-
 class Sync {
+    static _loadAccessToken() {
+        return localStorage.getItem('dbx-access-token');
+    }
+
+    static _saveAccessToken(accessToken) {
+        localStorage.setItem('dbx-access-token', accessToken);
+    }
+
     constructor() {
         this._clientId = 'mr76lz3bjoqdof3';
-        this._accessToken = loadAccessToken();
+        this._accessToken = Sync._loadAccessToken();
     }
 
     isAuthenticated() {
@@ -22,7 +22,7 @@ class Sync {
         const params = new URLSearchParams(window.location.hash.substr(1));
         if (params.has('access_token')) {
             this._accessToken = params.get('access_token');
-            saveAccessToken(this._accessToken);
+            Sync._saveAccessToken(this._accessToken);
             window.history.replaceState(null, '', window.location.pathname);
         } else {
             const url = new URL('https://www.dropbox.com/oauth2/authorize');
@@ -35,7 +35,7 @@ class Sync {
     }
 
     async sync() {
-        await sync(this._clientId, this._accessToken);
+        await sync(this._accessToken);
     }
 }
 

@@ -9,10 +9,10 @@ class WorkerRequestManager {
             const { id, result, error } = e.data;
             const request = this._requests[id];
             delete this._requests[id];
-            if (result) {
-                request.resolve(result);
-            } else {
+            if (error) {
                 request.reject(error);
+            } else {
+                request.resolve(result);
             }
         });
     }
@@ -29,6 +29,6 @@ class WorkerRequestManager {
 const instance = new WorkerRequestManager();
 
 const markdownToHtml = markdown => instance.request('markdownToHtml', markdown);
-const sync = (clientId, accessToken) => instance.request('sync', clientId, accessToken);
+const sync = accessToken => instance.request('sync', accessToken);
 
 export { markdownToHtml, sync };
