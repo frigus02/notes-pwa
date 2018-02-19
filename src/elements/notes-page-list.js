@@ -38,10 +38,10 @@ class NotesPageList extends NotesBaseElement {
 	async _syncNotes() {
 		try {
 			await sync.sync();
-			alert('Done :-)');
+			alert('Sync done :-)');
 		} catch (e) {
 			console.log(e);
-			alert('Error :-(');
+			alert('Sync error :-(\nSee console for details.');
 		}
 	}
 
