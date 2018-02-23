@@ -22,7 +22,7 @@ class Sync {
         const url = new URL('https://www.dropbox.com/oauth2/authorize');
         url.searchParams.append('response_type', 'token');
         url.searchParams.append('client_id', this._clientId);
-        url.searchParams.append('redirect_uri', 'http://localhost:8080');
+        url.searchParams.append('redirect_uri', `${window.location.origin}${window.location.pathname}`);
         window.location = url.toString();
         return new Promise(() => { });
     }
