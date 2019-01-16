@@ -33,7 +33,7 @@ class NotesPageNote extends NotesBaseElement {
 				await storage.updateNote(updatedNote);
 			};
 
-			return html`<notes-details dataNote="${note}" on-change="${onChange}"></notes-details>`;
+			return html`<notes-details .dataNote="${note}" @change="${onChange}"></notes-details>`;
 		});
 
 		return html`
@@ -45,7 +45,7 @@ class NotesPageNote extends NotesBaseElement {
 
 			<notes-toolbar>
 				Notes
-				<button slot="actions" on-click="${this._deleteNote}">Delete</button>
+				<button slot="actions" @click="${this._deleteNote}">Delete</button>
 			</notes-toolbar>
 			${until(noteDetails, 'Loading...')}
 		`;

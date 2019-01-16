@@ -47,7 +47,7 @@ class NotesPageList extends NotesBaseElement {
 
 	render() {
 		const notesList = storage.getNotes().then(notes =>
-			html`<notes-list dataNotes="${notes}"></notes-list>`);
+			html`<notes-list .dataNotes="${notes}"></notes-list>`);
 
 		return html`
 			<style>
@@ -58,8 +58,8 @@ class NotesPageList extends NotesBaseElement {
 
 			<notes-toolbar>
 				Notes
-				<button slot="actions" on-click="${this._syncNotes}">Sync</button>
-				<button slot="actions" on-click="${this._createNote}">New note</button>
+				<button slot="actions" @click="${this._syncNotes}">Sync</button>
+				<button slot="actions" @click="${this._createNote}">New note</button>
 			</notes-toolbar>
 			${until(notesList, 'Loading...')}
 		`;

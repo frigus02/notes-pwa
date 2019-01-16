@@ -58,15 +58,15 @@ class NotesDetails extends NotesBaseElement {
 					aria-label="Note title"
 					type="text"
 					value="${dataNote.title}"
-					on-change="${e => this._onChange({ title: e.target.value })}">
+					@change="${e => this._onChange({ title: e.target.value })}">
 			</h2>
 			<div class="metadata">
 				Modified: ${timeAgo(dataNote.modified)}
 			</div>
 			<notes-markdown-editor
 				aria-label="Note content"
-				value="${dataNote.body}"
-				on-change="${e => this._onChange({ body: e.target.value })}"></notes-markdown-editor>
+				.value="${dataNote.body}"
+				@change="${e => this._onChange({ body: e.target.value })}"></notes-markdown-editor>
 		`;
 	}
 }

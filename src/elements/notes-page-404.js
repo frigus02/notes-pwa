@@ -19,7 +19,7 @@ class NotesPage404 extends NotesBaseElement {
                 }
 			</style>
 
-			<notes-toolbar dataTitle="${"Not found"}"></notes-toolbar>
+			<notes-toolbar>Not found</notes-toolbar>
 			<p>Whooops. This page does not exist. I suggest you <a href="/">start again</a>.</p>
 		`;
 	}
