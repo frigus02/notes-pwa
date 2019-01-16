@@ -1,44 +1,43 @@
-'use strict';
+"use strict";
 
-const path = require('path');
+const path = require("path");
 
-const CopyWebpackPlugin = require('copy-webpack-plugin');
-const HtmlWebpackPlugin = require('html-webpack-plugin');
-const ServiceWorkerPlugin = require('./build/service-worker-plugin');
+const CopyWebpackPlugin = require("copy-webpack-plugin");
+const HtmlWebpackPlugin = require("html-webpack-plugin");
+const ServiceWorkerPlugin = require("./build/service-worker-plugin");
 
 module.exports = {
-    context: path.join(__dirname, 'src'),
-    entry: [
-        './elements/index.js',
-        './elements/notes-toolbar.js'
-    ],
+    context: path.join(__dirname, "src"),
+    entry: ["./elements/index.js", "./elements/notes-toolbar.js"],
     output: {
-        filename: 'bundle.js',
-        path: path.resolve(__dirname, 'dist')
+        filename: "bundle.js",
+        path: path.resolve(__dirname, "dist")
     },
     plugins: [
         new HtmlWebpackPlugin({
-            template: 'index.ejs',
+            template: "index.ejs",
             inject: false
         }),
         new CopyWebpackPlugin([
             {
-                from: '../node_modules/@webcomponents/webcomponentsjs/webcomponents-*.js',
-                to: 'node_modules/'
+                from:
+                    "../node_modules/@webcomponents/webcomponentsjs/webcomponents-*.js",
+                to: "node_modules/"
             },
             {
-                from: '../node_modules/@webcomponents/webcomponentsjs/bundles/*.js',
-                to: 'node_modules/'
+                from:
+                    "../node_modules/@webcomponents/webcomponentsjs/bundles/*.js",
+                to: "node_modules/"
             },
             {
-                from: 'images/*.png'
+                from: "images/*.png"
             },
             {
-                from: 'manifest.webmanifest'
+                from: "manifest.webmanifest"
             }
         ]),
         new ServiceWorkerPlugin({
-            filename: 'sw.js',
+            filename: "sw.js",
             disableServiceWorker: !!process.env.DISABLE_SERVICE_WORKER
         })
     ]

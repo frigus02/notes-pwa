@@ -1,34 +1,40 @@
-import storage from '../shared/storage.js';
+import storage from "../shared/storage.js";
 
 async function listDbxFiles(accessToken) {
     // https://dropbox.github.io/dropbox-api-v2-explorer/#files_list_folder
     // https://dropbox.github.io/dropbox-api-v2-explorer/#files_list_folder/continue
 
-    let response = await fetch('https://api.dropboxapi.com/2/files/list_folder', {
-        method: 'POST',
-        headers: {
-            'Authorization': `Bearer ${accessToken}`,
-            'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-            path: '',
-            recursive: true
-        })
-    });
+    let response = await fetch(
+        "https://api.dropboxapi.com/2/files/list_folder",
+        {
+            method: "POST",
+            headers: {
+                Authorization: `Bearer ${accessToken}`,
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+                path: "",
+                recursive: true
+            })
+        }
+    );
     let result = await response.json();
 
     const files = [...result.entries];
     while (result.has_more) {
-        let response = await fetch('https://api.dropboxapi.com/2/files/list_folder/continue', {
-            method: 'POST',
-            headers: {
-                'Authorization': `Bearer ${accessToken}`,
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({
-                cursor: result.cursor
-            })
-        });
+        let response = await fetch(
+            "https://api.dropboxapi.com/2/files/list_folder/continue",
+            {
+                method: "POST",
+                headers: {
+                    Authorization: `Bearer ${accessToken}`,
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({
+                    cursor: result.cursor
+                })
+            }
+        );
         let result = await response.json();
 
         files.push(...result.entries);
@@ -41,20 +47,26 @@ async function downloadDbxFile(accessToken, dbxFile, note) {
     // https://dropbox.github.io/dropbox-api-v2-explorer/#files_download
 
     // Download file
-    const response = await fetch('https://content.dropboxapi.com/2/files/download', {
-        method: 'POST',
-        headers: {
-            'Authorization': `Bearer ${accessToken}`,
-            'Dropbox-API-Arg': JSON.stringify({
-                path: dbxFile.path_lower
-            })
+    const response = await fetch(
+        "https://content.dropboxapi.com/2/files/download",
+        {
+            method: "POST",
+            headers: {
+                Authorization: `Bearer ${accessToken}`,
+                "Dropbox-API-Arg": JSON.stringify({
+                    path: dbxFile.path_lower
+                })
+            }
         }
-    });
-    const metadata = JSON.parse(response.headers.get('dropbox-api-result'));
+    );
+    const metadata = JSON.parse(response.headers.get("dropbox-api-result"));
     const contents = await response.text();
 
     // Update note
-    note.title = dbxFile.path_display.split('/').pop().split('.')[0];
+    note.title = dbxFile.path_display
+        .split("/")
+        .pop()
+        .split(".")[0];
     note.body = contents;
     note.sync = {
         id: metadata.id,
@@ -67,22 +79,23 @@ async function uploadDbxFile(accessToken, dbxFile, note) {
     // https://dropbox.github.io/dropbox-api-v2-explorer/#files_upload
 
     // Upload file
-    const response = await fetch('https://content.dropboxapi.com/2/files/upload', {
-        method: 'POST',
-        headers: {
-            'Authorization': `Bearer ${accessToken}`,
-            'Content-Type': 'application/octet-stream',
-            'Dropbox-API-Arg': JSON.stringify({
-                path: dbxFile
-                    ? dbxFile.path_lower
-                    : `/${note.title}.md`,
-                mode: note.sync
-                    ? { '.tag': 'update', update: note.sync.rev }
-                    : { '.tag': 'add' }
-            })
-        },
-        body: note.body
-    });
+    const response = await fetch(
+        "https://content.dropboxapi.com/2/files/upload",
+        {
+            method: "POST",
+            headers: {
+                Authorization: `Bearer ${accessToken}`,
+                "Content-Type": "application/octet-stream",
+                "Dropbox-API-Arg": JSON.stringify({
+                    path: dbxFile ? dbxFile.path_lower : `/${note.title}.md`,
+                    mode: note.sync
+                        ? { ".tag": "update", update: note.sync.rev }
+                        : { ".tag": "add" }
+                })
+            },
+            body: note.body
+        }
+    );
     const result = await response.json();
 
     // Update note
@@ -96,11 +109,11 @@ async function uploadDbxFile(accessToken, dbxFile, note) {
 async function deleteDbxFile(accessToken, dbxFile) {
     // https://dropbox.github.io/dropbox-api-v2-explorer/#files_delete_v2
 
-    await fetch('https://api.dropboxapi.com/2/files/delete_v2', {
-        method: 'POST',
+    await fetch("https://api.dropboxapi.com/2/files/delete_v2", {
+        method: "POST",
         headers: {
-            'Authorization': `Bearer ${accessToken}`,
-            'Content-Type': 'application/json'
+            Authorization: `Bearer ${accessToken}`,
+            "Content-Type": "application/json"
         },
         body: JSON.stringify({
             path: dbxFile.path_lower
@@ -120,7 +133,9 @@ async function sync(accessToken) {
         ...notes
             .filter(note => !items.some(item => item.note === note))
             .map(note => ({
-                dbxFile: note.sync && dbxFiles.find(dbxFile => dbxFile.id === note.sync.id),
+                dbxFile:
+                    note.sync &&
+                    dbxFiles.find(dbxFile => dbxFile.id === note.sync.id),
                 note
             }))
     );

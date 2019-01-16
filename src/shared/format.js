@@ -6,10 +6,10 @@ export const MS_DAY = MS_HOUR * 24;
 export function timeAgo(date) {
     const diff = Date.now() - date;
     return diff < MS_MINUTE
-        ? 'just now'
+        ? "just now"
         : diff < MS_HOUR
-            ? `${Math.floor(diff / MS_MINUTE)} mins ago`
-            : diff < MS_DAY
-                ? `${Math.floor(diff / MS_HOUR)} hours ago`
-                : `${Math.floor(diff / MS_DAY)} days ago`;
+        ? `${Math.floor(diff / MS_MINUTE)} mins ago`
+        : diff < MS_DAY
+        ? `${Math.floor(diff / MS_HOUR)} hours ago`
+        : `${Math.floor(diff / MS_DAY)} days ago`;
 }

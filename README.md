@@ -4,8 +4,8 @@
 
 A note taking application (like OneNote or Evernote, only much simpler) written as a PWA. The goal is to match the look and feel of native smartphone applications. This includes:
 
-* Adding the application to your homescreen.
-* Fully working offline.
+-   Adding the application to your homescreen.
+-   Fully working offline.
 
 ## Try it
 

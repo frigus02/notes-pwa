@@ -8,57 +8,57 @@ export { repeat } from "lit-html/directives/repeat.js";
 export { until } from "lit-html/directives/until.js";
 
 function handleLink(e) {
-  e.preventDefault();
-  router.navigate(e.currentTarget.pathname);
+    e.preventDefault();
+    router.navigate(e.currentTarget.pathname);
 }
 
 class NotesBaseElement extends PropertiesMixin(HTMLElement) {
-  ready() {
-    if (window.ShadyCSS) {
-      ShadyCSS.styleElement(this);
+    ready() {
+        if (window.ShadyCSS) {
+            ShadyCSS.styleElement(this);
+        }
+
+        this.attachShadow({ mode: "open" });
+        super.ready();
     }
 
-    this.attachShadow({ mode: "open" });
-    super.ready();
-  }
-
-  _shouldPropertiesChange(/*props, changedProps, prevProps*/) {
-    return true;
-  }
-
-  _propertiesChanged(props, changedProps, prevProps) {
-    super._propertiesChanged(props, changedProps, prevProps);
-    const result = this.render(props);
-    if (result) {
-      render(result, this.shadowRoot, this.constructor.is);
-      this._handleRelativeLinksWithRouter();
+    _shouldPropertiesChange(/*props, changedProps, prevProps*/) {
+        return true;
     }
-  }
 
-  _handleRelativeLinksWithRouter() {
-    const links = this.shadowRoot.querySelectorAll('a[href^="/"]');
-    for (const link of links) {
-      link.removeEventListener("click", handleLink);
-      link.addEventListener("click", handleLink);
+    _propertiesChanged(props, changedProps, prevProps) {
+        super._propertiesChanged(props, changedProps, prevProps);
+        const result = this.render(props);
+        if (result) {
+            render(result, this.shadowRoot, this.constructor.is);
+            this._handleRelativeLinksWithRouter();
+        }
     }
-  }
 
-  invalidate() {
-    this._invalidateProperties();
-  }
+    _handleRelativeLinksWithRouter() {
+        const links = this.shadowRoot.querySelectorAll('a[href^="/"]');
+        for (const link of links) {
+            link.removeEventListener("click", handleLink);
+            link.addEventListener("click", handleLink);
+        }
+    }
 
-  render(/*props*/) {
-    throw new Error("render() not implemented");
-  }
+    invalidate() {
+        this._invalidateProperties();
+    }
+
+    render(/*props*/) {
+        throw new Error("render() not implemented");
+    }
 }
 
 const dynamicElement = directive((elementName, properties) => part => {
-  const element = document.createElement(elementName);
-  for (const prop in properties) {
-    element[prop] = properties[prop];
-  }
+    const element = document.createElement(elementName);
+    for (const prop in properties) {
+        element[prop] = properties[prop];
+    }
 
-  part.setValue(element);
+    part.setValue(element);
 });
 
 export default NotesBaseElement;

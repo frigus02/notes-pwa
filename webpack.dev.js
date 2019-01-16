@@ -1,17 +1,17 @@
-'use strict';
+"use strict";
 
-const merge = require('webpack-merge');
+const merge = require("webpack-merge");
 
-const common = require('./webpack.common.js');
+const common = require("./webpack.common.js");
 
 module.exports = merge(common, {
-    mode: 'development',
+    mode: "development",
     devServer: {
         compress: true,
         historyApiFallback: true,
-        host: '0.0.0.0',
+        host: "0.0.0.0",
         //https: true,
         port: 8080
     },
-    devtool: 'eval-source-map'
+    devtool: "eval-source-map"
 });
