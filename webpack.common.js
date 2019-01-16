@@ -27,6 +27,10 @@ module.exports = {
                 to: 'node_modules/'
             },
             {
+                from: '../node_modules/@webcomponents/webcomponentsjs/bundles/*.js',
+                to: 'node_modules/'
+            },
+            {
                 from: 'images/*.png'
             },
             {

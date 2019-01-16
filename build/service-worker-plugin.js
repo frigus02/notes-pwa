@@ -22,26 +22,19 @@ class ServiceWorkerPlugin {
     apply(compiler) {
         const resolvedFile = path.resolve(compiler.context, this.options.filename);
 
-        compiler.plugin('emit', async (compilation, callback) => {
-            try {
-                const source = this.options.disableServiceWorker
-                    ? `console.log('Service worker is disabled.')`
-                    : await this._generateServiceWorker(resolvedFile, compilation.assets);
+        compiler.hooks.emit.tapPromise('ServiceWorkerPlugin', async compilation => {
+            const source = this.options.disableServiceWorker
+                ? `console.log('Service worker is disabled.')`
+                : await this._generateServiceWorker(resolvedFile, compilation.assets);
 
-                compilation.assets[this.options.filename] = {
-                    source: () => source,
-                    size: () => Buffer.byteLength(source, 'utf8'),
-                };
-
-                callback();
-            } catch (e) {
-                callback(e);
-            }
+            compilation.assets[this.options.filename] = {
+                source: () => source,
+                size: () => Buffer.byteLength(source, 'utf8'),
+            };
         });
 
-        compiler.plugin('after-emit', (compilation, callback) => {
-            compilation.fileDependencies.push(resolvedFile);
-            callback();
+        compiler.hooks.afterEmit.tap('ServiceWorkerPlugin', compilation => {
+            compilation.fileDependencies.add(resolvedFile);
         });
     }
 }
