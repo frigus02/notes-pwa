@@ -5,6 +5,7 @@ import router from "./utils/router.js";
 
 export { html } from "lit-html/lib/shady-render.js";
 export { repeat } from "lit-html/directives/repeat.js";
+export { unsafeHTML } from "lit-html/directives/unsafe-html";
 export { until } from "lit-html/directives/until.js";
 
 function handleLink(e) {

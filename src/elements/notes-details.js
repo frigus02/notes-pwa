@@ -1,5 +1,5 @@
 import NotesBaseElement, { html } from "./notes-base-element.js";
-import "./notes-markdown-editor.js";
+import "./notes-markdown.js";
 
 import { timeAgo } from "../shared/format.js";
 
@@ -14,15 +14,6 @@ class NotesDetails extends NotesBaseElement {
         };
     }
 
-    _onChange(changedProps) {
-        this.dataNote = Object.assign({}, this.dataNote, changedProps);
-        this.dispatchEvent(
-            new CustomEvent("change", {
-                detail: this.dataNote
-            })
-        );
-    }
-
     render({ dataNote }) {
         if (!dataNote) return;
         return html`
@@ -34,13 +25,9 @@ class NotesDetails extends NotesBaseElement {
 
                 h2 {
                     margin: 0 0 4px;
-                }
-
-                h2 input {
-                    border: none;
-                    border-bottom: 1px solid var(--divider-color);
+                    padding: 1px;
                     font-size: 18px;
-                    width: 100%;
+                    border-bottom: 1px solid var(--divider-color);
                 }
 
                 .metadata {
@@ -48,27 +35,11 @@ class NotesDetails extends NotesBaseElement {
                     font-size: 12px;
                     margin-bottom: 16px;
                 }
-
-                textarea {
-                    width: 100%;
-                    resize: vertical;
-                }
             </style>
 
-            <h2>
-                <input
-                    aria-label="Note title"
-                    type="text"
-                    value="${dataNote.title}"
-                    @change="${e => this._onChange({ title: e.target.value })}"
-                />
-            </h2>
+            <h2>${dataNote.title}</h2>
             <div class="metadata">Modified: ${timeAgo(dataNote.modified)}</div>
-            <notes-markdown-editor
-                aria-label="Note content"
-                .value="${dataNote.body}"
-                @change="${e => this._onChange({ body: e.target.value })}"
-            ></notes-markdown-editor>
+            <notes-markdown .value="${dataNote.body}"></notes-markdown>
         `;
     }
 }

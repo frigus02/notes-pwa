@@ -32,14 +32,11 @@ class NotesToolbar extends NotesBaseElement {
                     margin: 0;
                     font-size: 20px;
                 }
-
-                .actions {
-                }
             </style>
 
             <header>
                 <h1><slot></slot></h1>
-                <div class="actions"><slot name="actions"></slot></div>
+                <div><slot name="actions"></slot></div>
             </header>
         `;
     }
