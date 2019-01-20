@@ -37,4 +37,9 @@ function notesToolbar() {
     `;
 }
 
-customElements.define("notes-toolbar", makeWebComponent(notesToolbar, render));
+customElements.define(
+    "notes-toolbar",
+    makeWebComponent(notesToolbar, {
+        render
+    })
+);

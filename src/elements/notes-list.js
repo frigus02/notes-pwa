@@ -75,6 +75,10 @@ function notesList({ dataNotes }) {
     `;
 }
 
-notesList.props = ["dataNotes"];
-
-customElements.define("notes-list", makeWebComponent(notesList, render));
+customElements.define(
+    "notes-list",
+    makeWebComponent(notesList, {
+        props: ["dataNotes"],
+        render
+    })
+);

@@ -33,4 +33,10 @@ function notesDetails({ dataNote }) {
     `;
 }
 
-customElements.define("notes-details", makeWebComponent(notesDetails, render));
+customElements.define(
+    "notes-details",
+    makeWebComponent(notesDetails, {
+        props: ["dataNote"],
+        render
+    })
+);

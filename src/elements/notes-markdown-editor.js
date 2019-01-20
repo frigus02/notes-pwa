@@ -1,10 +1,9 @@
 import { makeWebComponent } from "function-web-components";
 import { html, render } from "./notes-base-element.js";
 
-function notesMarkdownEditor({ value }) {
+function notesMarkdownEditor({ value, setValue }) {
     const onChange = newValue => {
-        // TODO: dispatch event
-        this.dispatchEvent(new CustomEvent("change", { detail: newValue }));
+        setValue(newValue, { eventName: "change" });
     };
 
     return html`
@@ -30,5 +29,8 @@ function notesMarkdownEditor({ value }) {
 
 customElements.define(
     "notes-markdown-editor",
-    makeWebComponent(notesMarkdownEditor, render)
+    makeWebComponent(notesMarkdownEditor, {
+        attrs: ["value"],
+        render
+    })
 );

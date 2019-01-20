@@ -23,5 +23,8 @@ function notesMarkdown({ value }) {
 
 customElements.define(
     "notes-markdown",
-    makeWebComponent(notesMarkdown, render)
+    makeWebComponent(notesMarkdown, {
+        attrs: ["value"],
+        render
+    })
 );

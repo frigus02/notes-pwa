@@ -4,15 +4,12 @@ import "./notes-markdown-editor.js";
 
 import { timeAgo } from "../shared/format.js";
 
-function notesDetailsEdit({ dataNote }) {
+function notesDetailsEdit({ dataNote, setDataNote }) {
     if (!dataNote) return;
 
     const onChange = changedProps => {
         const newDataNote = Object.assign({}, dataNote, changedProps);
-        // TODO: update own property
-        this.dataNote = newDataNote;
-        // TODO: dispatch event
-        this.dispatchEvent(new CustomEvent("change", { detail: newDataNote }));
+        setDataNote(newDataNote, { eventName: "change" });
     };
 
     return html`
@@ -65,5 +62,8 @@ function notesDetailsEdit({ dataNote }) {
 
 customElements.define(
     "notes-details-edit",
-    makeWebComponent(notesDetailsEdit, render)
+    makeWebComponent(notesDetailsEdit, {
+        props: ["dataNote"],
+        render
+    })
 );

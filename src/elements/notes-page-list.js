@@ -7,7 +7,7 @@ import sync from "./utils/sync.js";
 
 import storage from "../shared/storage.js";
 
-function notesPageList({ dataState }) {
+function notesPageList() {
     const notesList = storage.getNotes().then(
         notes =>
             html`
@@ -52,5 +52,7 @@ function notesPageList({ dataState }) {
 
 customElements.define(
     "notes-page-list",
-    makeWebComponent(notesPageList, render)
+    makeWebComponent(notesPageList, {
+        render
+    })
 );

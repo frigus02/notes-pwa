@@ -7,7 +7,7 @@
   "private": true,
   "dependencies": {
     "@webcomponents/webcomponentsjs": "2.2.3",
-    "function-web-components": "0.0.4",
+    "function-web-components": "0.0.5",
     "lit-html": "1.0.0-rc.2",
     "marked": "0.6.0"
   },

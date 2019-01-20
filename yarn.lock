@@ -1585,10 +1585,10 @@ function-bind@^1.1.1:
   resolved "https://registry.yarnpkg.com/function-bind/-/function-bind-1.1.1.tgz#a56899d3ea3c9bab874bb9773b7c5ede92f4895d"
   integrity sha512-yIovAzMX49sF8Yl58fSCWJ5svSLuaibPxXQJFLmBObTuCr0Mf1KiPopGM9NiFjiYBCbfaa2Fh6breQ6ANVTI0A==
 
-function-web-components@0.0.4:
-  version "0.0.4"
-  resolved "https://registry.yarnpkg.com/function-web-components/-/function-web-components-0.0.4.tgz#19f1b731c6d34c995e40825abb6b175bfbefeffa"
-  integrity sha512-77btr24o3+MqrT7/ZMIf8RbgMmKcDefEdAzzgCbrBxmHYWRC0XBGBLEBAcLY30S3Ybxcag4N4q2AV8kF7xAPvw==
+function-web-components@0.0.5:
+  version "0.0.5"
+  resolved "https://registry.yarnpkg.com/function-web-components/-/function-web-components-0.0.5.tgz#555dd1b70f0f8cde0f734cc8d908e3a8d2343a56"
+  integrity sha512-B1r7CD5Q2CLLmql67UsDMUzaQ5yc+tq5CEDvbgh6UE7YSUC+3Qo7gWkbKJqNGLmv4JHhhpMs/vPPyMQr8e2PyA==
 
 gauge@~2.7.3:
   version "2.7.4"

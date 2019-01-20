@@ -72,5 +72,8 @@ function notesPageNote({ dataState }) {
 
 customElements.define(
     "notes-page-note",
-    makeWebComponent(notesPageNote, render)
+    makeWebComponent(notesPageNote, {
+        props: ["dataState"],
+        render
+    })
 );
