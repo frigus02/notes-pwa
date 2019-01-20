@@ -1,39 +1,27 @@
-import NotesBaseElement, {
-    html,
-    unsafeHTML,
-    until
-} from "./notes-base-element.js";
+import { makeWebComponent } from "function-web-components";
+import { html, render, unsafeHTML, until } from "./notes-base-element.js";
 import { markdownToHtml } from "./utils/worker.js";
 
-class NotesMarkdown extends NotesBaseElement {
-    static get is() {
-        return "notes-markdown";
-    }
+function notesMarkdown({ value }) {
+    const rendered = markdownToHtml(value).then(
+        raw =>
+            html`
+                ${unsafeHTML(raw)}
+            `
+    );
 
-    static get properties() {
-        return {
-            value: String
-        };
-    }
+    return html`
+        <style>
+            :host {
+                display: block;
+            }
+        </style>
 
-    render({ value }) {
-        const rendered = markdownToHtml(value).then(
-            raw =>
-                html`
-                    ${unsafeHTML(raw)}
-                `
-        );
-
-        return html`
-            <style>
-                :host {
-                    display: block;
-                }
-            </style>
-
-            ${until(rendered, "Loading...")}
-        `;
-    }
+        ${until(rendered, "Loading...")}
+    `;
 }
 
-customElements.define(NotesMarkdown.is, NotesMarkdown);
+customElements.define(
+    "notes-markdown",
+    makeWebComponent(notesMarkdown, render)
+);

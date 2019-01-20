@@ -1,45 +1,34 @@
-import NotesBaseElement, { html } from "./notes-base-element.js";
+import { makeWebComponent } from "function-web-components";
+import { html, render } from "./notes-base-element.js";
 
-class NotesMarkdownEditor extends NotesBaseElement {
-    static get is() {
-        return "notes-markdown-editor";
-    }
+function notesMarkdownEditor({ value }) {
+    const onChange = newValue => {
+        // TODO: dispatch event
+        this.dispatchEvent(new CustomEvent("change", { detail: newValue }));
+    };
 
-    static get properties() {
-        return {
-            value: String
-        };
-    }
+    return html`
+        <style>
+            :host {
+                display: block;
+            }
 
-    _onChange(newValue) {
-        this.dispatchEvent(
-            new CustomEvent("change", {
-                detail: newValue
-            })
-        );
-    }
+            textarea {
+                width: 100%;
+                height: 100%;
+                resize: none;
+                box-sizing: border-box;
+            }
+        </style>
 
-    render({ value }) {
-        return html`
-            <style>
-                :host {
-                    display: block;
-                }
-
-                textarea {
-                    width: 100%;
-                    height: 100%;
-                    resize: none;
-                    box-sizing: border-box;
-                }
-            </style>
-
-            <textarea
-                @input="${e => this._onChange(e.target.value)}"
-                .value="${value}"
-            ></textarea>
-        `;
-    }
+        <textarea
+            @input="${e => onChange(e.target.value)}"
+            .value="${value}"
+        ></textarea>
+    `;
 }
 
-customElements.define(NotesMarkdownEditor.is, NotesMarkdownEditor);
+customElements.define(
+    "notes-markdown-editor",
+    makeWebComponent(notesMarkdownEditor, render)
+);
