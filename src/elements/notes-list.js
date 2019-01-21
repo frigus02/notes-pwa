@@ -54,23 +54,21 @@ function notesList({ dataNotes }) {
         </style>
 
         <ul class="list">
-            ${
-                repeat(
-                    dataNotes,
-                    note => note.id,
-                    note => html`
-                        <li class="note-item">
-                            <a href="/note/${note.id}">
-                                <h2>${note.title}</h2>
-                                <p>
-                                    <span class="summary">${note.body}</span>
-                                    <span>${timeAgo(note.modified)}</span>
-                                </p>
-                            </a>
-                        </li>
-                    `
-                )
-            }
+            ${repeat(
+                dataNotes,
+                note => note.id,
+                note => html`
+                    <li class="note-item">
+                        <a href="/note/${note.id}">
+                            <h2>${note.title}</h2>
+                            <p>
+                                <span class="summary">${note.body}</span>
+                                <span>${timeAgo(note.modified)}</span>
+                            </p>
+                        </a>
+                    </li>
+                `
+            )}
         </ul>
     `;
 }
