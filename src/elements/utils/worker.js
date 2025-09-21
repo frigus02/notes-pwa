@@ -1,10 +1,12 @@
-import Worker from "worker-loader?name=worker-[hash].js!../../worker/index.js";
 import { newId } from "../../shared/id.js";
 
 class WorkerRequestManager {
     constructor() {
         this._requests = {};
-        this._worker = new Worker();
+        this._worker = new Worker(
+            new URL("../../worker/index.js", import.meta.url),
+            { type: "module" }
+        );
         this._worker.addEventListener("message", e => {
             const { id, result, error } = e.data;
             const request = this._requests[id];

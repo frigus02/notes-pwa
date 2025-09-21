@@ -10,6 +10,7 @@
     <link rel="apple-touch-icon-precomposed" sizes="152x152" href="images/icon_152x152.png">
     <link rel="icon" type="image/png" href="images/icon_16x16.png" sizes="16x16">
     <link rel="icon" type="image/png" href="images/icon_32x32.png" sizes="32x32">
+    <link rel="shortcut icon" href="favicon.ico">
     <meta name="application-name" content="Notes PWA">
     <meta name="theme-color" content="#5d4037">
     <meta name="msapplication-TileColor" content="#5d4037">
@@ -23,14 +24,8 @@
 <body>
     <notes-app></notes-app>
 
-    <script src="node_modules/@webcomponents/webcomponentsjs/webcomponents-loader.js"></script>
-    <script>
-        document.addEventListener('WebComponentsReady', () => {
-            const script = document.createElement('script');
-            script.src = '<%= htmlWebpackPlugin.files.js[0] %>';
-            document.head.appendChild(script);
-        }, { once: true });
-
+    <script type="module" src="elements/index.js"></script>
+    <script type="module">
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
                 navigator.serviceWorker.register('/sw.js').then(registration => {

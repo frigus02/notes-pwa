@@ -1,42 +1,21 @@
-const path = require('path');
-const fs = require('fs');
-const { promisify } = require('util');
+import { readFile } from "fs/promises";
 
-const readFile = promisify(fs.readFile);
+export function serviceWorkerPlugin({ src, out }) {
+    return {
+        name: "service-worker-plugin",
+        async generateBundle(_options, bundle) {
+            const source = await readFile(src, "utf-8");
+            const cacheName = `const CACHE_NAME = ${JSON.stringify(
+                Date.now().toString()
+            )};`;
+            const assets = Object.keys(bundle);
+            const cacheUrls = `const CACHE_URLS = ${JSON.stringify(assets)};`;
 
-class ServiceWorkerPlugin {
-    constructor(options) {
-        this.options = options;
-        this.assets = new Set();
-    }
-
-    async _generateServiceWorker(file, newAssets) {
-        Object.keys(newAssets).forEach(asset => this.assets.add(asset));
-
-        const source = await readFile(file, { encoding: 'utf8' });
-        const cacheName = `const CACHE_NAME = ${JSON.stringify(Date.now().toString())};`;
-        const cacheUrls = `const CACHE_URLS = ${JSON.stringify([...this.assets])};`;
-        return `${cacheName}\n${cacheUrls}\n${source}`;
-    }
-
-    apply(compiler) {
-        const resolvedFile = path.resolve(compiler.context, this.options.filename);
-
-        compiler.hooks.emit.tapPromise('ServiceWorkerPlugin', async compilation => {
-            const source = this.options.disableServiceWorker
-                ? `console.log('Service worker is disabled.')`
-                : await this._generateServiceWorker(resolvedFile, compilation.assets);
-
-            compilation.assets[this.options.filename] = {
-                source: () => source,
-                size: () => Buffer.byteLength(source, 'utf8'),
-            };
-        });
-
-        compiler.hooks.afterEmit.tap('ServiceWorkerPlugin', compilation => {
-            compilation.fileDependencies.add(resolvedFile);
-        });
-    }
+            this.emitFile({
+                type: "asset",
+                fileName: out,
+                source: `${cacheName}\n${cacheUrls}\n${source}`
+            });
+        }
+    };
 }
-
-module.exports = ServiceWorkerPlugin;
