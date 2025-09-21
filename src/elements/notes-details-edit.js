@@ -7,7 +7,7 @@ import { timeAgo } from "../shared/format.js";
 function notesDetailsEdit({ dataNote, setDataNote }) {
     if (!dataNote) return;
 
-    const onChange = changedProps => {
+    const onChange = (changedProps) => {
         const newDataNote = Object.assign({}, dataNote, changedProps);
         setDataNote(newDataNote, { eventName: "change" });
     };
@@ -48,14 +48,14 @@ function notesDetailsEdit({ dataNote, setDataNote }) {
                 aria-label="Note title"
                 type="text"
                 value="${dataNote.title}"
-                @change="${e => onChange({ title: e.target.value })}"
+                @change="${(e) => onChange({ title: e.target.value })}"
             />
         </h2>
         <div class="metadata">Modified: ${timeAgo(dataNote.modified)}</div>
         <notes-markdown-editor
             aria-label="Note content"
             .value="${dataNote.body}"
-            @change="${e => onChange({ body: e.detail })}"
+            @change="${(e) => onChange({ body: e.detail })}"
         ></notes-markdown-editor>
     `;
 }
@@ -64,6 +64,6 @@ customElements.define(
     "notes-details-edit",
     makeWebComponent(notesDetailsEdit, {
         props: ["dataNote"],
-        render
-    })
+        render,
+    }),
 );

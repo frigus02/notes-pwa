@@ -56,8 +56,8 @@ function notesList({ dataNotes }) {
         <ul class="list">
             ${repeat(
                 dataNotes,
-                note => note.id,
-                note => html`
+                (note) => note.id,
+                (note) => html`
                     <li class="note-item">
                         <a href="/note/${note.id}">
                             <h2>${note.title}</h2>
@@ -67,7 +67,7 @@ function notesList({ dataNotes }) {
                             </p>
                         </a>
                     </li>
-                `
+                `,
             )}
         </ul>
     `;
@@ -77,6 +77,6 @@ customElements.define(
     "notes-list",
     makeWebComponent(notesList, {
         props: ["dataNotes"],
-        render
-    })
+        render,
+    }),
 );

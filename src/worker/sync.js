@@ -10,13 +10,13 @@ async function listDbxFiles(accessToken) {
             method: "POST",
             headers: {
                 Authorization: `Bearer ${accessToken}`,
-                "Content-Type": "application/json"
+                "Content-Type": "application/json",
             },
             body: JSON.stringify({
                 path: "",
-                recursive: true
-            })
-        }
+                recursive: true,
+            }),
+        },
     );
     let result = await response.json();
 
@@ -28,12 +28,12 @@ async function listDbxFiles(accessToken) {
                 method: "POST",
                 headers: {
                     Authorization: `Bearer ${accessToken}`,
-                    "Content-Type": "application/json"
+                    "Content-Type": "application/json",
                 },
                 body: JSON.stringify({
-                    cursor: result.cursor
-                })
-            }
+                    cursor: result.cursor,
+                }),
+            },
         );
         let result = await response.json();
 
@@ -54,23 +54,20 @@ async function downloadDbxFile(accessToken, dbxFile, note) {
             headers: {
                 Authorization: `Bearer ${accessToken}`,
                 "Dropbox-API-Arg": JSON.stringify({
-                    path: dbxFile.path_lower
-                })
-            }
-        }
+                    path: dbxFile.path_lower,
+                }),
+            },
+        },
     );
     const metadata = JSON.parse(response.headers.get("dropbox-api-result"));
     const contents = await response.text();
 
     // Update note
-    note.title = dbxFile.path_display
-        .split("/")
-        .pop()
-        .split(".")[0];
+    note.title = dbxFile.path_display.split("/").pop().split(".")[0];
     note.body = contents;
     note.sync = {
         id: metadata.id,
-        rev: metadata.rev
+        rev: metadata.rev,
     };
     await storage.updateNote(note, true);
 }
@@ -90,18 +87,18 @@ async function uploadDbxFile(accessToken, dbxFile, note) {
                     path: dbxFile ? dbxFile.path_lower : `/${note.title}.md`,
                     mode: note.sync
                         ? { ".tag": "update", update: note.sync.rev }
-                        : { ".tag": "add" }
-                })
+                        : { ".tag": "add" },
+                }),
             },
-            body: note.body
-        }
+            body: note.body,
+        },
     );
     const result = await response.json();
 
     // Update note
     note.sync = {
         id: result.id,
-        rev: result.rev
+        rev: result.rev,
     };
     await storage.updateNote(note, true);
 }
@@ -113,11 +110,11 @@ async function deleteDbxFile(accessToken, dbxFile) {
         method: "POST",
         headers: {
             Authorization: `Bearer ${accessToken}`,
-            "Content-Type": "application/json"
+            "Content-Type": "application/json",
         },
         body: JSON.stringify({
-            path: dbxFile.path_lower
-        })
+            path: dbxFile.path_lower,
+        }),
     });
 }
 
@@ -125,19 +122,19 @@ async function sync(accessToken) {
     const notes = await storage.getNotes(true);
     const dbxFiles = await listDbxFiles(accessToken);
 
-    const items = dbxFiles.map(dbxFile => ({
+    const items = dbxFiles.map((dbxFile) => ({
         dbxFile,
-        note: notes.find(note => note.sync && note.sync.id === dbxFile.id)
+        note: notes.find((note) => note.sync && note.sync.id === dbxFile.id),
     }));
     items.push(
         ...notes
-            .filter(note => !items.some(item => item.note === note))
-            .map(note => ({
+            .filter((note) => !items.some((item) => item.note === note))
+            .map((note) => ({
                 dbxFile:
                     note.sync &&
-                    dbxFiles.find(dbxFile => dbxFile.id === note.sync.id),
-                note
-            }))
+                    dbxFiles.find((dbxFile) => dbxFile.id === note.sync.id),
+                note,
+            })),
     );
 
     for (const item of items) {
@@ -160,7 +157,7 @@ async function sync(accessToken) {
     }
 
     // Remove deleted notes
-    const deletedNotes = notes.filter(note => note._deleted);
+    const deletedNotes = notes.filter((note) => note._deleted);
     for (const note of deletedNotes) {
         await storage.deleteNote(note.id, true);
     }

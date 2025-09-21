@@ -37,6 +37,6 @@ customElements.define(
     "notes-details",
     makeWebComponent(notesDetails, {
         props: ["dataNote"],
-        render
-    })
+        render,
+    }),
 );

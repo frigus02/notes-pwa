@@ -2,7 +2,7 @@ import { makeWebComponent } from "function-web-components";
 import { html, render } from "./notes-base-element.js";
 
 function notesMarkdownEditor({ value, setValue }) {
-    const onChange = newValue => {
+    const onChange = (newValue) => {
         setValue(newValue, { eventName: "change" });
     };
 
@@ -21,7 +21,7 @@ function notesMarkdownEditor({ value, setValue }) {
         </style>
 
         <textarea
-            @input="${e => onChange(e.target.value)}"
+            @input="${(e) => onChange(e.target.value)}"
             .value="${value}"
         ></textarea>
     `;
@@ -31,6 +31,6 @@ customElements.define(
     "notes-markdown-editor",
     makeWebComponent(notesMarkdownEditor, {
         attrs: ["value"],
-        render
-    })
+        render,
+    }),
 );

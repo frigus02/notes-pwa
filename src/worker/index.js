@@ -4,15 +4,15 @@ import sync from "./sync.js";
 marked.setOptions({
     gfm: true,
     tables: false,
-    breaks: true
+    breaks: true,
 });
 
 const actions = {
     markdownToHtml: marked,
-    sync
+    sync,
 };
 
-addEventListener("message", async function(e) {
+addEventListener("message", async function (e) {
     const { id, action, args } = e.data;
     try {
         const result = await actions[action](...args);

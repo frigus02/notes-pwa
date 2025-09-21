@@ -4,10 +4,7 @@ import { markdownToHtml } from "./utils/worker.js";
 
 function notesMarkdown({ value }) {
     const rendered = markdownToHtml(value).then(
-        raw =>
-            html`
-                ${unsafeHTML(raw)}
-            `
+        (raw) => html` ${unsafeHTML(raw)} `,
     );
 
     return html`
@@ -25,6 +22,6 @@ customElements.define(
     "notes-markdown",
     makeWebComponent(notesMarkdown, {
         attrs: ["value"],
-        render
-    })
+        render,
+    }),
 );

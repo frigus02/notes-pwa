@@ -6,10 +6,10 @@ const NOTES = [{ title: "Hello", body: "Looks like this is your first note." }];
 class Storage extends EventTarget {
     static toPromise(request) {
         return new Promise((resolve, reject) => {
-            request.onerror = event => {
+            request.onerror = (event) => {
                 reject(event.target.error);
             };
-            request.onsuccess = event => {
+            request.onsuccess = (event) => {
                 resolve(event.target.result);
             };
         });
@@ -20,17 +20,17 @@ class Storage extends EventTarget {
             const request = indexedDB.open("notes", 1);
             this._dbPromise = Storage.toPromise(request);
 
-            request.onupgradeneeded = event => {
+            request.onupgradeneeded = (event) => {
                 const db = event.target.result;
                 const objectStore = db.createObjectStore("notes", {
-                    keyPath: "id"
+                    keyPath: "id",
                 });
                 objectStore.createIndex("modified", "modified");
                 objectStore.transaction.oncomplete = () => {
                     const notesObjectStore = db
                         .transaction("notes", "readwrite")
                         .objectStore("notes");
-                    NOTES.forEach(note => {
+                    NOTES.forEach((note) => {
                         note.id = newId();
                         note.modified = new Date();
                         notesObjectStore.add(note);
@@ -45,16 +45,16 @@ class Storage extends EventTarget {
     async _transaction(objectStoreNames, mode, callback) {
         const db = await this._openDatabase();
         const transaction = db.transaction(objectStoreNames, mode);
-        const objectStores = objectStoreNames.map(name =>
-            transaction.objectStore(name)
+        const objectStores = objectStoreNames.map((name) =>
+            transaction.objectStore(name),
         );
         const result = callback(objectStores);
 
         return new Promise((resolve, reject) => {
-            transaction.onerror = event => {
+            transaction.onerror = (event) => {
                 reject(event.target.error);
             };
-            transaction.oncomplete = event => {
+            transaction.oncomplete = (event) => {
                 resolve(result);
             };
         });
@@ -65,28 +65,32 @@ class Storage extends EventTarget {
             id: newId(),
             title: "New note",
             body: "",
-            modified: new Date()
+            modified: new Date(),
         };
-        return this._transaction(["notes"], "readwrite", objectStores => {
+        return this._transaction(["notes"], "readwrite", (objectStores) => {
             objectStores[0].add(note);
             return note;
         });
     }
 
     getNotes(includeDeleted) {
-        return this._transaction(["notes"], "readonly", async objectStores => {
-            const modifiedIndex = objectStores[0].index("modified");
-            let notes = await Storage.toPromise(modifiedIndex.getAll());
-            if (!includeDeleted) {
-                notes = notes.filter(note => !note._deleted);
-            }
+        return this._transaction(
+            ["notes"],
+            "readonly",
+            async (objectStores) => {
+                const modifiedIndex = objectStores[0].index("modified");
+                let notes = await Storage.toPromise(modifiedIndex.getAll());
+                if (!includeDeleted) {
+                    notes = notes.filter((note) => !note._deleted);
+                }
 
-            return notes.reverse();
-        });
+                return notes.reverse();
+            },
+        );
     }
 
     getNote(id) {
-        return this._transaction(["notes"], "readonly", objectStores => {
+        return this._transaction(["notes"], "readonly", (objectStores) => {
             return Storage.toPromise(objectStores[0].get(id));
         });
     }
@@ -97,23 +101,27 @@ class Storage extends EventTarget {
             note.sync.lastSync = note.modified;
         }
 
-        return this._transaction(["notes"], "readwrite", objectStores => {
+        return this._transaction(["notes"], "readwrite", (objectStores) => {
             objectStores[0].put(note);
         });
     }
 
     deleteNote(id, force) {
-        return this._transaction(["notes"], "readwrite", async objectStores => {
-            if (force) {
-                objectStores[0].delete(id);
-            } else {
-                objectStores[0].get(id).onsuccess = e => {
-                    const note = e.target.result;
-                    note._deleted = true;
-                    objectStores[0].put(note);
-                };
-            }
-        });
+        return this._transaction(
+            ["notes"],
+            "readwrite",
+            async (objectStores) => {
+                if (force) {
+                    objectStores[0].delete(id);
+                } else {
+                    objectStores[0].get(id).onsuccess = (e) => {
+                        const note = e.target.result;
+                        note._deleted = true;
+                        objectStores[0].put(note);
+                    };
+                }
+            },
+        );
     }
 }
 

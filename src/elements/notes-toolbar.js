@@ -40,6 +40,6 @@ function notesToolbar() {
 customElements.define(
     "notes-toolbar",
     makeWebComponent(notesToolbar, {
-        render
-    })
+        render,
+    }),
 );

@@ -8,12 +8,11 @@ import sync from "./utils/sync.js";
 import storage from "../shared/storage.js";
 
 function notesPageList() {
-    const notesList = storage.getNotes().then(
-        notes =>
-            html`
-                <notes-list .dataNotes="${notes}"></notes-list>
-            `
-    );
+    const notesList = storage
+        .getNotes()
+        .then(
+            (notes) => html` <notes-list .dataNotes="${notes}"></notes-list> `,
+        );
 
     const syncNotes = async () => {
         try {
@@ -53,6 +52,6 @@ function notesPageList() {
 customElements.define(
     "notes-page-list",
     makeWebComponent(notesPageList, {
-        render
-    })
+        render,
+    }),
 );

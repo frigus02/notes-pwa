@@ -26,6 +26,6 @@ function notesPage404() {
 customElements.define(
     "notes-page-404",
     makeWebComponent(notesPage404, {
-        render
-    })
+        render,
+    }),
 );

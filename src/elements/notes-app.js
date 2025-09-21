@@ -34,7 +34,7 @@ class NotesApp extends HTMLElement {
     renderToDOM() {
         const result = this.render({
             dataPage: this.dataPage,
-            dataPageParams: this.dataPageParams
+            dataPageParams: this.dataPageParams,
         });
         if (result) {
             render(result, this.shadowRoot);
@@ -44,8 +44,8 @@ class NotesApp extends HTMLElement {
     render({ dataPage, dataPageParams }) {
         const page = import(`./notes-page-${dataPage}.js`).then(() =>
             dynamicElement(`notes-page-${dataPage}`, {
-                dataState: Object.assign({}, dataPageParams)
-            })
+                dataState: Object.assign({}, dataPageParams),
+            }),
         );
 
         return html`

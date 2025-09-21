@@ -5,7 +5,7 @@ export default {
     root: "src",
     build: {
         outDir: "../dist",
-        emptyOutDir: true
+        emptyOutDir: true,
     },
-    plugins: [serviceWorkerPlugin({ src: "src/sw.js", out: "sw.js" })]
+    plugins: [serviceWorkerPlugin({ src: "src/sw.js", out: "sw.js" })],
 };

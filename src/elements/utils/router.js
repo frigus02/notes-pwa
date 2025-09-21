@@ -48,9 +48,9 @@ class Router extends EventTarget {
                     detail: {
                         route: this.route,
                         params: this.params,
-                        path: this.path
-                    }
-                })
+                        path: this.path,
+                    },
+                }),
             );
         }
     }
@@ -65,7 +65,7 @@ class Router extends EventTarget {
 
 const instance = new Router({
     list: "/",
-    note: "/note/:noteId"
+    note: "/note/:noteId",
 });
 
 export default instance;

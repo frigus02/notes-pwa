@@ -14,7 +14,7 @@ class Sync {
             return true;
         } else if (params.has("error")) {
             console.log(
-                `${params.get("error")}\n${params.get("error_description")}`
+                `${params.get("error")}\n${params.get("error_description")}`,
             );
             window.history.pushState(null, "", window.location.pathname);
         }
@@ -26,7 +26,7 @@ class Sync {
         url.searchParams.append("client_id", this._clientId);
         url.searchParams.append(
             "redirect_uri",
-            `${window.location.origin}${window.location.pathname}`
+            `${window.location.origin}${window.location.pathname}`,
         );
         window.location = url.toString();
         return new Promise(() => {});

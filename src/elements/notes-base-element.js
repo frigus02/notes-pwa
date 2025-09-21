@@ -24,7 +24,7 @@ function render(templatePart, element) {
     handleRelativeLinksWithRouter(element);
 }
 
-const dynamicElement = directive((elementName, properties) => part => {
+const dynamicElement = directive((elementName, properties) => (part) => {
     const element = document.createElement(elementName);
     for (const prop in properties) {
         element[prop] = properties[prop];

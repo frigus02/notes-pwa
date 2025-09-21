@@ -24,8 +24,8 @@ function notesPageNote({ dataState }) {
         router.navigate("/");
     };
 
-    const noteDetails = storage.getNote(dataState.noteId).then(note => {
-        const onChange = async e => {
+    const noteDetails = storage.getNote(dataState.noteId).then((note) => {
+        const onChange = async (e) => {
             const updatedNote = e.detail;
             await storage.updateNote(updatedNote);
         };
@@ -37,9 +37,7 @@ function notesPageNote({ dataState }) {
                       @change="${onChange}"
                   ></notes-details-edit>
               `
-            : html`
-                  <notes-details .dataNote="${note}"></notes-details>
-              `;
+            : html` <notes-details .dataNote="${note}"></notes-details> `;
     });
 
     return html`
@@ -74,6 +72,6 @@ customElements.define(
     "notes-page-note",
     makeWebComponent(notesPageNote, {
         props: ["dataState"],
-        render
-    })
+        render,
+    }),
 );
