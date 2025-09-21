@@ -1,4 +1,4 @@
-import marked from "marked/lib/marked.js";
+import { marked } from "marked";
 import sync from "./sync.js";
 
 marked.setOptions({
