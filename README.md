@@ -14,8 +14,8 @@ Go to https://notes.kuehle.me on your smartphone and add the website to your hom
 ## Develop
 
 ```
-yarn install
-DISABLE_SERVICE_WORKER=1 yarn start
+npm i
+DISABLE_SERVICE_WORKER=1 npm run start
 ```
 
 ## License
