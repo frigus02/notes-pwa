@@ -1,4 +1,3 @@
-import { MS_DAY } from "./format.js";
 import { newId } from "./id.js";
 
 const NOTES = [{ title: "Hello", body: "Looks like this is your first note." }];
@@ -22,6 +21,7 @@ class Storage extends EventTarget {
 
             request.onupgradeneeded = (event) => {
                 const db = event.target.result;
+
                 const objectStore = db.createObjectStore("notes", {
                     keyPath: "id",
                 });
@@ -36,6 +36,10 @@ class Storage extends EventTarget {
                         notesObjectStore.add(note);
                     });
                 };
+
+                const objectStoreSettings = db.createObjectStore("settings", {
+                    keyPath: "name",
+                });
             };
         }
 
@@ -120,6 +124,30 @@ class Storage extends EventTarget {
                         objectStores[0].put(note);
                     };
                 }
+            },
+        );
+    }
+
+    saveSettings(settings) {
+        return this._transaction(["settings"], "readwrite", (objectStores) => {
+            for (const [name, value] of Object.entries(settings)) {
+                objectStores[0].put({
+                    name,
+                    value,
+                });
+            }
+        });
+    }
+
+    loadSettings() {
+        return this._transaction(
+            ["settings"],
+            "readonly",
+            async (objectStores) => {
+                const items = await Storage.toPromise(objectStores[0].getAll());
+                return Object.fromEntries(
+                    items.map((item) => [item.name, item.value]),
+                );
             },
         );
     }

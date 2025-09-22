@@ -66,6 +66,7 @@ class Router extends EventTarget {
 const instance = new Router({
     list: "/",
     note: "/note/:noteId",
+    settings: "/settings",
 });
 
 export default instance;

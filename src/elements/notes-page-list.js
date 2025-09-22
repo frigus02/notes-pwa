@@ -3,7 +3,6 @@ import { html, render, until } from "./notes-base-element.js";
 import "./notes-list.js";
 import "./notes-toolbar.js";
 import router from "./utils/router.js";
-import sync from "./utils/sync.js";
 
 import storage from "../shared/storage.js";
 
@@ -16,7 +15,6 @@ function notesPageList() {
 
     const syncNotes = async () => {
         try {
-            await sync.sync();
             alert("Sync done :-)");
         } catch (e) {
             console.log(e);
@@ -29,10 +27,9 @@ function notesPageList() {
         router.navigate(`/note/${note.id}`);
     };
 
-    // TODO: call when connected
-    // if (sync.continueSync()) {
-    //    this._syncNotes();
-    // }
+    const openSettings = () => {
+        router.navigate("/settings");
+    };
 
     return html`
         <style>
@@ -44,6 +41,7 @@ function notesPageList() {
         <notes-toolbar>
             Notes <button slot="actions" @click="${syncNotes}">Sync</button>
             <button slot="actions" @click="${createNote}">New note</button>
+            <button slot="actions" @click="${openSettings}">Settings</button>
         </notes-toolbar>
         ${until(notesList, "Loading...")}
     `;
