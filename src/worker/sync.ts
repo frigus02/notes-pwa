@@ -1,186 +1,153 @@
 import storage, { type Note } from "../shared/storage.js";
 
-interface DbxFile {
-    id: string;
-    rev: string;
-    path_lower: string;
-    path_display: string;
+export interface Options {
+    pat: string;
+    repoOwner: string;
+    repoName: string;
 }
 
-async function listDbxFiles(accessToken: string): Promise<DbxFile[]> {
-    // https://dropbox.github.io/dropbox-api-v2-explorer/#files_list_folder
-    // https://dropbox.github.io/dropbox-api-v2-explorer/#files_list_folder/continue
-
-    let response = await fetch(
-        "https://api.dropboxapi.com/2/files/list_folder",
-        {
-            method: "POST",
-            headers: {
-                Authorization: `Bearer ${accessToken}`,
-                "Content-Type": "application/json",
-            },
-            body: JSON.stringify({
-                path: "",
-                recursive: true,
-            }),
-        },
-    );
-    let result = await response.json();
-
-    const files: DbxFile[] = [...result.entries];
-    while (result.has_more) {
-        response = await fetch(
-            "https://api.dropboxapi.com/2/files/list_folder/continue",
-            {
-                method: "POST",
-                headers: {
-                    Authorization: `Bearer ${accessToken}`,
-                    "Content-Type": "application/json",
-                },
-                body: JSON.stringify({
-                    cursor: result.cursor,
-                }),
-            },
-        );
-        result = await response.json();
-
-        files.push(...result.entries);
-    }
-
-    return files;
-}
-
-async function downloadDbxFile(
-    accessToken: string,
-    dbxFile: DbxFile,
-    note: Note,
+async function ghGraphQL(
+    options: Options,
+    query: string,
+    variables: Record<string, string>,
 ) {
-    // https://dropbox.github.io/dropbox-api-v2-explorer/#files_download
-
-    // Download file
-    const response = await fetch(
-        "https://content.dropboxapi.com/2/files/download",
-        {
-            method: "POST",
-            headers: {
-                Authorization: `Bearer ${accessToken}`,
-                "Dropbox-API-Arg": JSON.stringify({
-                    path: dbxFile.path_lower,
-                }),
-            },
-        },
-    );
-    const metadata = JSON.parse(response.headers.get("dropbox-api-result")!);
-    const contents = await response.text();
-
-    // Update note
-    note.title = dbxFile.path_display.split("/").pop()!.split(".")[0];
-    note.body = contents;
-    note.sync = {
-        id: metadata.id,
-        rev: metadata.rev,
-    };
-    await storage.updateNote(note, true);
-}
-
-async function uploadDbxFile(
-    accessToken: string,
-    dbxFile: DbxFile | null,
-    note: Note,
-) {
-    // https://dropbox.github.io/dropbox-api-v2-explorer/#files_upload
-
-    // Upload file
-    const response = await fetch(
-        "https://content.dropboxapi.com/2/files/upload",
-        {
-            method: "POST",
-            headers: {
-                Authorization: `Bearer ${accessToken}`,
-                "Content-Type": "application/octet-stream",
-                "Dropbox-API-Arg": JSON.stringify({
-                    path: dbxFile ? dbxFile.path_lower : `/${note.title}.md`,
-                    mode: note.sync
-                        ? { ".tag": "update", update: note.sync.rev }
-                        : { ".tag": "add" },
-                }),
-            },
-            body: note.body,
-        },
-    );
-    const result = await response.json();
-
-    // Update note
-    note.sync = {
-        id: result.id,
-        rev: result.rev,
-    };
-    await storage.updateNote(note, true);
-}
-
-async function deleteDbxFile(accessToken: string, dbxFile: DbxFile) {
-    // https://dropbox.github.io/dropbox-api-v2-explorer/#files_delete_v2
-
-    await fetch("https://api.dropboxapi.com/2/files/delete_v2", {
+    const res = await fetch("https://api.github.com/graphql", {
         method: "POST",
         headers: {
-            Authorization: `Bearer ${accessToken}`,
-            "Content-Type": "application/json",
+            authorization: `Bearer ${options.pat}`,
         },
         body: JSON.stringify({
-            path: dbxFile.path_lower,
+            query,
+            variables,
         }),
     });
+    if (!res.ok) {
+        throw new Error("fetch failed: " + res.statusText);
+    }
+
+    const result = await res.json();
+    return result.data;
 }
 
-async function sync(accessToken: string) {
-    const notes = await storage.getNotes(true);
-    const dbxFiles = await listDbxFiles(accessToken);
-
-    interface Item {
-        dbxFile: DbxFile | undefined;
-        note: Note | undefined;
+async function ghRest(
+    options: Options,
+    pathAndQuery: string,
+    init: RequestInit,
+) {
+    const res = await fetch(`https://api.github.com` + pathAndQuery, {
+        ...init,
+        headers: {
+            accept: "application/vnd.github+json",
+            authorization: `Bearer ${options.pat}`,
+            ...init.headers,
+        },
+    });
+    if (!res.ok) {
+        throw new Error("fetch failed: " + res.statusText);
     }
 
-    const items: Item[] = dbxFiles.map((dbxFile) => ({
-        dbxFile,
-        note: notes.find((note) => note.sync && note.sync.id === dbxFile.id),
-    }));
-    items.push(
-        ...notes
-            .filter((note) => !items.some((item) => item.note === note))
-            .map((note) => ({
-                dbxFile:
-                    note.sync &&
-                    dbxFiles.find((dbxFile) => dbxFile.id === note.sync!.id),
-                note,
-            })),
-    );
+    const result = await res.json();
+    return result;
+}
 
-    for (const item of items) {
-        if (!item.note) {
-            const note = await storage.createNote();
-            await downloadDbxFile(accessToken, item.dbxFile!, note);
-        } else if (!item.dbxFile) {
-            if (item.note.sync) {
-                item.note._deleted = true;
-            } else if (!item.note._deleted) {
-                await uploadDbxFile(accessToken, null, item.note);
+interface RepoHead {
+    id: string;
+    oid: string;
+}
+
+async function getRepoHead(options: Options): Promise<RepoHead> {
+    const result = await ghGraphQL(
+        options,
+        `query($owner: String!, $name: String!) {
+          repository(owner: $owner, name: $name) {
+            defaultBranchRef {
+              id
+              target {
+                oid
+              }
             }
-        } else if (item.note._deleted) {
-            await deleteDbxFile(accessToken, item.dbxFile);
-        } else if ((item.note.sync?.lastSync ?? 0) < item.note.modified) {
-            await uploadDbxFile(accessToken, item.dbxFile, item.note);
-        } else if (item.note.sync?.rev !== item.dbxFile.rev) {
-            await downloadDbxFile(accessToken, item.dbxFile, item.note);
-        }
+          }
+        }`,
+        {
+            owner: options.repoOwner,
+            name: options.repoName,
+        },
+    );
+    return {
+        id: result.repository.defaultBranchRef.id,
+        oid: result.repository.defaultBranchRef.target.oid,
+    };
+}
+
+interface TreeObject {
+    path: string;
+    mode: string;
+    type: string;
+    sha: string;
+    size?: number;
+    url?: string;
+}
+
+interface GetTreesResponse {
+    sha: string;
+    url?: string;
+    tree: TreeObject[];
+    truncated: boolean;
+}
+
+interface Blob {
+    path: string;
+    sha: string;
+}
+
+async function getTreeRecursive(
+    options: Options,
+    head: RepoHead,
+): Promise<Blob[]> {
+    const result: GetTreesResponse = await ghRest(
+        options,
+        `/repos/${options.repoOwner}/${options.repoName}/git/trees/${head.oid}?recursive=1`,
+        {
+            headers: {
+                "X-GitHub-Api-Version": "2022-11-28",
+            },
+        },
+    );
+    if (result.truncated) {
+        throw new Error("trees truncated; not supported");
     }
+
+    return result.tree
+        .filter((item) => item.type === "blob" && item.path.endsWith(".md"))
+        .map((item) => ({ path: item.path, sha: item.sha }) satisfies Blob);
+}
+
+export async function sync(options: Options) {
+    const notes = await storage.getNotes(true);
+
+    const head = await getRepoHead(options);
+    console.log("HEAD", head);
+    const blobs = await getTreeRecursive(options, head);
+    console.log("tree", blobs);
+
+    // loop through blobs
+    // - if matching note based on path
+    //   - update note.currentRemote --> if head differs, fetch blob content
+    //   - if note.currentRemote == note.lastSyncRemote == note.{body,deleted} --> all done
+    //   - if note.currentRemote != note.lastSyncRemote != note --> merge
+    //   - if note.currentRemote != note.lastSyncRemote --> update note.body
+    //   - if note.lastSyncRemote != note --> update remote
+    // - else --> create local note
+    //
+    // loop through notes not yet visited
+    // - if note has remote
+    //   - if note != note.lastSyncRemote --> recreate remote note?
+    //   - else --> delete local note
+    // - else --> create remote note
 
     // Remove deleted notes
-    const deletedNotes = notes.filter((note) => note._deleted);
+    const deletedNotes = notes.filter((note) => note.deleted);
     for (const note of deletedNotes) {
         await storage.deleteNote(note.id, true);
     }
 }
-
-export default sync;

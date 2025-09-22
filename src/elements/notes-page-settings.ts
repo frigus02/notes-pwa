@@ -18,8 +18,25 @@ function notesPageSettings() {
                         aria-describedby="gh-pat-hint"
                     />
                     <div class="hint" id="gh-pat-hint">
-                        GitHub Personal Access Token. Requires scopes: a, b, c
+                        GitHub Personal Access Token. Requires scopes: Contents
+                        read and write
                     </div>
+                </fieldset>
+                <fieldset>
+                    <label for="gh-repo-owner">GitHub Repo Owner</label>
+                    <input
+                        id="gh-repo-owner"
+                        name="gh-repo-owner"
+                        value=${settings.gitHubRepoOwner ?? ""}
+                    />
+                </fieldset>
+                <fieldset>
+                    <label for="gh-repo-name">GitHub Repo Name</label>
+                    <input
+                        id="gh-repo-name"
+                        name="gh-repo-name"
+                        value=${settings.gitHubRepoName ?? ""}
+                    />
                 </fieldset>
                 <input type="submit" value="Save" />
             </form>
@@ -31,6 +48,10 @@ function notesPageSettings() {
         const data = new FormData(e.target as HTMLFormElement);
         const settings = {
             gitHubPat: (data.get("gh-pat") as string | null)?.trim() ?? "",
+            gitHubRepoOwner:
+                (data.get("gh-repo-owner") as string | null)?.trim() ?? "",
+            gitHubRepoName:
+                (data.get("gh-repo-name") as string | null)?.trim() ?? "",
         };
         await storage.saveSettings(settings);
         router.navigate("/");

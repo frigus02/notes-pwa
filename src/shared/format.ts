@@ -1,7 +1,21 @@
+import type { Note } from "./storage";
+
 export const MS_SECOND = 1000;
 export const MS_MINUTE = MS_SECOND * 60;
 export const MS_HOUR = MS_MINUTE * 60;
 export const MS_DAY = MS_HOUR * 24;
+
+export function getNoteTitle(note: Note): string {
+    const lines = note.body.split("\n");
+    for (let line of lines) {
+        line = line.trim();
+        if (line.startsWith("#")) {
+            return line.replace(/^#+ */, "");
+        }
+    }
+
+    return "<no title>";
+}
 
 export function timeAgo(date: number) {
     const diff = Date.now() - date;

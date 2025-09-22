@@ -39,7 +39,10 @@ const instance = new WorkerRequestManager();
 
 const markdownToHtml = (markdown: string): Promise<string> =>
     instance.request("markdownToHtml", markdown) as Promise<string>;
-const sync = (accessToken: string): Promise<void> =>
-    instance.request("sync", accessToken) as Promise<void>;
+const sync = (options: {
+    pat: string;
+    repoOwner: string;
+    repoName: string;
+}): Promise<void> => instance.request("sync", options) as Promise<void>;
 
 export { markdownToHtml, sync };

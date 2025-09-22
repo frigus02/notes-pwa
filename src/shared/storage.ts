@@ -2,23 +2,25 @@ import { newId } from "./id.js";
 
 export interface Note {
     id: string;
-    title: string;
+    path: string;
     body: string;
     modified: Date;
-    sync?: {
-        id: string;
-        rev: string;
-        lastSync?: Date;
-    };
-    _deleted?: true;
+    deleted: boolean;
+    lastSyncRemote: { body: string; sha: string } | undefined;
+    currentRemote: { body: string; sha: string } | undefined;
 }
 
-const NOTES: Array<Pick<Note, "title" | "body">> = [
-    { title: "Hello", body: "Looks like this is your first note." },
+const NOTES: Array<Pick<Note, "path" | "body">> = [
+    {
+        path: "hello.md",
+        body: "# Hello\n\nLooks like this is your first note.",
+    },
 ];
 
 export interface Settings {
     gitHubPat: string;
+    gitHubRepoOwner: string;
+    gitHubRepoName: string;
 }
 
 class Storage extends EventTarget {
@@ -47,6 +49,7 @@ class Storage extends EventTarget {
                     keyPath: "id",
                 });
                 objectStore.createIndex("modified", "modified");
+                objectStore.createIndex("path", "path", { unique: true });
                 objectStore.transaction.oncomplete = () => {
                     const notesObjectStore = db
                         .transaction("notes", "readwrite")
@@ -56,6 +59,9 @@ class Storage extends EventTarget {
                             ...note,
                             id: newId(),
                             modified: new Date(),
+                            deleted: false,
+                            lastSyncRemote: undefined,
+                            currentRemote: undefined,
                         };
                         notesObjectStore.add(newNote);
                     });
@@ -95,9 +101,12 @@ class Storage extends EventTarget {
     createNote(): Promise<Note> {
         const note: Note = {
             id: newId(),
-            title: "New note",
-            body: "",
+            path: "new.md",
+            body: "# New note",
             modified: new Date(),
+            deleted: false,
+            lastSyncRemote: undefined,
+            currentRemote: undefined,
         };
         return this._transaction(["notes"], "readwrite", (objectStores) => {
             objectStores[0].add(note);
@@ -127,12 +136,8 @@ class Storage extends EventTarget {
         });
     }
 
-    updateNote(note: Note, setSyncDate?: boolean): Promise<void> {
+    updateNote(note: Note): Promise<void> {
         note.modified = new Date();
-        if (setSyncDate && note.sync) {
-            note.sync.lastSync = note.modified;
-        }
-
         return this._transaction(["notes"], "readwrite", (objectStores) => {
             objectStores[0].put(note);
         });
@@ -148,7 +153,7 @@ class Storage extends EventTarget {
                 } else {
                     objectStores[0].get(id).onsuccess = (e) => {
                         const note: Note = (e.target as IDBRequest).result;
-                        note._deleted = true;
+                        note.deleted = true;
                         objectStores[0].put(note);
                     };
                 }

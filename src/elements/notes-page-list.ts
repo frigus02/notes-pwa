@@ -3,6 +3,7 @@ import { html, render, until } from "./notes-base-element.js";
 import "./notes-list.js";
 import "./notes-toolbar.js";
 import router from "./utils/router.js";
+import { sync } from "./utils/worker.js";
 
 import storage from "../shared/storage.js";
 
@@ -19,7 +20,17 @@ function notesPageList() {
             alert("Please configure in Settings.");
             return;
         }
-        alert("Sync done :-)");
+        try {
+            await sync({
+                pat: settings.gitHubPat,
+                repoOwner: settings.gitHubRepoOwner,
+                repoName: settings.gitHubRepoName,
+            });
+            alert("Sync done :-)");
+        } catch (e) {
+            console.error(e);
+            alert("Sync failed. Look in the console for details.");
+        }
     };
 
     const createNote = async () => {

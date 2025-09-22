@@ -17,7 +17,7 @@
   },
   "scripts": {
     "start": "vite",
-    "build": "vite build",
+    "build": "tsc && vite build",
     "format": "prettier --write \"*.{js,md}\" \"src/**/*.{js,ts,md}\""
   }
 }

@@ -48,15 +48,7 @@ function notesDetailsEdit({ dataNote, setDataNote }: Props) {
             }
         </style>
 
-        <h2>
-            <input
-                aria-label="Note title"
-                type="text"
-                value="${dataNote.title}"
-                @change="${(e: Event) =>
-                    onChange({ title: (e.target as HTMLInputElement).value })}"
-            />
-        </h2>
+        <h2>${dataNote.title}</h2>
         <div class="metadata">
             Modified: ${timeAgo(dataNote.modified.getTime())}
         </div>
