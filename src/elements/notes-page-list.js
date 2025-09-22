@@ -14,12 +14,12 @@ function notesPageList() {
         );
 
     const syncNotes = async () => {
-        try {
-            alert("Sync done :-)");
-        } catch (e) {
-            console.log(e);
-            alert("Sync error :-(\nSee console for details.");
+        const settings = await storage.loadSettings();
+        if (!settings.gitHubPat) {
+            alert("Please configure in Settings.");
+            return;
         }
+        alert("Sync done :-)");
     };
 
     const createNote = async () => {
