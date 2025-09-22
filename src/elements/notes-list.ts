@@ -68,7 +68,7 @@ function notesList({ dataNotes }: Props) {
                             <h2>${note.title}</h2>
                             <p>
                                 <span class="summary">${note.body}</span>
-                                <span>${timeAgo(note.modified.getDate())}</span>
+                                <span>${timeAgo(note.modified.getTime())}</span>
                             </p>
                         </a>
                     </li>

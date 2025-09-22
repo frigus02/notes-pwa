@@ -58,7 +58,7 @@ function notesDetailsEdit({ dataNote, setDataNote }: Props) {
             />
         </h2>
         <div class="metadata">
-            Modified: ${timeAgo(dataNote.modified.getDate())}
+            Modified: ${timeAgo(dataNote.modified.getTime())}
         </div>
         <notes-markdown-editor
             aria-label="Note content"

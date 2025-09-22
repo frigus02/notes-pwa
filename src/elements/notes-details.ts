@@ -32,7 +32,9 @@ function notesDetails({ dataNote }: Props) {
         </style>
 
         <h2>${dataNote.title}</h2>
-        <div class="metadata">Modified: ${timeAgo(dataNote.modified)}</div>
+        <div class="metadata">
+            Modified: ${timeAgo(dataNote.modified.getTime())}
+        </div>
         <notes-markdown .value="${dataNote.body}"></notes-markdown>
     `;
 }
