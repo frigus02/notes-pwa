@@ -51,7 +51,7 @@ class NotesApp extends HTMLElement {
         dataPage: string;
         dataPageParams: Params;
     }) {
-        const page = import(`./notes-page-${dataPage}.js`).then(() =>
+        const page = import(`./notes-page-${dataPage}.ts`).then(() =>
             dynamicElement(`notes-page-${dataPage}`, {
                 dataState: Object.assign({}, dataPageParams),
             }),
