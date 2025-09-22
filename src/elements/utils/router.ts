@@ -1,12 +1,15 @@
-class Router extends EventTarget {
-    static matchRoute(template, path) {
+export type Routes = Record<string, string>;
+export type Params = Record<string, string>;
+
+export class Router extends EventTarget {
+    static matchRoute(template: string, path: string): Params | null {
         const templateSegments = template.split("/");
         const pathSegments = path.split("/");
         if (templateSegments.length !== pathSegments.length) {
             return null;
         }
 
-        const params = {};
+        const params: Params = {};
         for (let i = 0; i < templateSegments.length; i++) {
             if (templateSegments[i].startsWith(":")) {
                 params[templateSegments[i].substr(1)] = pathSegments[i];
@@ -18,14 +21,19 @@ class Router extends EventTarget {
         return params;
     }
 
-    constructor(routes) {
+    private _routes: Routes;
+    path!: string;
+    route!: string;
+    params!: Params;
+
+    constructor(routes: Routes) {
         super();
         this._routes = routes;
         this._resolve();
         window.addEventListener("popstate", () => this._resolve(true));
     }
 
-    _resolve(dispatch) {
+    _resolve(dispatch?: boolean) {
         if (this.path === window.location.pathname) {
             return;
         }
@@ -55,7 +63,7 @@ class Router extends EventTarget {
         }
     }
 
-    navigate(path) {
+    navigate(path: string) {
         if (path !== this.path) {
             window.history.pushState(null, "", path);
             this._resolve(true);

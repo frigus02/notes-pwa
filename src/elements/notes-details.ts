@@ -4,7 +4,11 @@ import "./notes-markdown.js";
 
 import { timeAgo } from "../shared/format.js";
 
-function notesDetails({ dataNote }) {
+interface Props {
+    [key: string]: any;
+}
+
+function notesDetails({ dataNote }: Props) {
     if (!dataNote) return;
     return html`
         <style>

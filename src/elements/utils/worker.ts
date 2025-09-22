@@ -1,6 +1,13 @@
+import { type Action } from "../../worker/index.js";
 import { newId } from "../../shared/id.js";
 
 class WorkerRequestManager {
+    private _requests: Record<
+        string,
+        { resolve: (result: unknown) => void; reject: (error: unknown) => void }
+    >;
+    private _worker: Worker;
+
     constructor() {
         this._requests = {};
         this._worker = new Worker(
@@ -19,7 +26,7 @@ class WorkerRequestManager {
         });
     }
 
-    request(action, ...args) {
+    request(action: Action, ...args: any[]) {
         const id = newId();
         return new Promise((resolve, reject) => {
             this._requests[id] = { resolve, reject };
@@ -30,8 +37,9 @@ class WorkerRequestManager {
 
 const instance = new WorkerRequestManager();
 
-const markdownToHtml = (markdown) =>
-    instance.request("markdownToHtml", markdown);
-const sync = (accessToken) => instance.request("sync", accessToken);
+const markdownToHtml = (markdown: string): Promise<string> =>
+    instance.request("markdownToHtml", markdown) as Promise<string>;
+const sync = (accessToken: string): Promise<void> =>
+    instance.request("sync", accessToken) as Promise<void>;
 
 export { markdownToHtml, sync };

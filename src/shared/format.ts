@@ -3,7 +3,7 @@ export const MS_MINUTE = MS_SECOND * 60;
 export const MS_HOUR = MS_MINUTE * 60;
 export const MS_DAY = MS_HOUR * 24;
 
-export function timeAgo(date) {
+export function timeAgo(date: number) {
     const diff = Date.now() - date;
     return diff < MS_MINUTE
         ? "just now"

@@ -1,0 +1,29 @@
+{
+    "compilerOptions": {
+        "rootDir": "./src",
+
+        "module": "esnext",
+        "moduleDetection": "force",
+        "moduleResolution": "bundler",
+        "esModuleInterop": true,
+
+        "target": "esnext",
+
+        "noEmit": true,
+        "allowImportingTsExtensions": true,
+        "allowArbitraryExtensions": true,
+        "sourceMap": true,
+
+        "strict": true,
+        "exactOptionalPropertyTypes": true,
+        "noImplicitReturns": true,
+        "noImplicitOverride": true,
+        "noUnusedLocals": true,
+        "noUnusedParameters": true,
+        "noFallthroughCasesInSwitch": true,
+        "noPropertyAccessFromIndexSignature": true,
+        "verbatimModuleSyntax": true,
+        "noUncheckedSideEffectImports": true,
+        "skipLibCheck": true
+    }
+}

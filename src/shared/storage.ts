@@ -1,15 +1,36 @@
 import { newId } from "./id.js";
 
-const NOTES = [{ title: "Hello", body: "Looks like this is your first note." }];
+export interface Note {
+    id: string;
+    title: string;
+    body: string;
+    modified: Date;
+    sync?: {
+        id: string;
+        rev: string;
+        lastSync?: Date;
+    };
+    _deleted?: true;
+}
+
+const NOTES: Array<Pick<Note, "title" | "body">> = [
+    { title: "Hello", body: "Looks like this is your first note." },
+];
+
+export interface Settings {
+    gitHubPat: string;
+}
 
 class Storage extends EventTarget {
-    static toPromise(request) {
+    private _dbPromise?: Promise<IDBDatabase>;
+
+    static toPromise<T>(request: IDBRequest<T>): Promise<T> {
         return new Promise((resolve, reject) => {
-            request.onerror = (event) => {
-                reject(event.target.error);
+            request.onerror = () => {
+                reject(request.error);
             };
-            request.onsuccess = (event) => {
-                resolve(event.target.result);
+            request.onsuccess = () => {
+                resolve(request.result);
             };
         });
     }
@@ -19,8 +40,8 @@ class Storage extends EventTarget {
             const request = indexedDB.open("notes", 1);
             this._dbPromise = Storage.toPromise(request);
 
-            request.onupgradeneeded = (event) => {
-                const db = event.target.result;
+            request.onupgradeneeded = () => {
+                const db = request.result;
 
                 const objectStore = db.createObjectStore("notes", {
                     keyPath: "id",
@@ -31,13 +52,16 @@ class Storage extends EventTarget {
                         .transaction("notes", "readwrite")
                         .objectStore("notes");
                     NOTES.forEach((note) => {
-                        note.id = newId();
-                        note.modified = new Date();
-                        notesObjectStore.add(note);
+                        const newNote: Note = {
+                            ...note,
+                            id: newId(),
+                            modified: new Date(),
+                        };
+                        notesObjectStore.add(newNote);
                     });
                 };
 
-                const objectStoreSettings = db.createObjectStore("settings", {
+                db.createObjectStore("settings", {
                     keyPath: "name",
                 });
             };
@@ -46,7 +70,11 @@ class Storage extends EventTarget {
         return this._dbPromise;
     }
 
-    async _transaction(objectStoreNames, mode, callback) {
+    async _transaction<T>(
+        objectStoreNames: string[],
+        mode: IDBTransactionMode,
+        callback: (objectStores: IDBObjectStore[]) => T | PromiseLike<T>,
+    ): Promise<T> {
         const db = await this._openDatabase();
         const transaction = db.transaction(objectStoreNames, mode);
         const objectStores = objectStoreNames.map((name) =>
@@ -55,17 +83,17 @@ class Storage extends EventTarget {
         const result = callback(objectStores);
 
         return new Promise((resolve, reject) => {
-            transaction.onerror = (event) => {
-                reject(event.target.error);
+            transaction.onerror = () => {
+                reject(transaction.error);
             };
-            transaction.oncomplete = (event) => {
+            transaction.oncomplete = () => {
                 resolve(result);
             };
         });
     }
 
-    createNote() {
-        const note = {
+    createNote(): Promise<Note> {
+        const note: Note = {
             id: newId(),
             title: "New note",
             body: "",
@@ -77,7 +105,7 @@ class Storage extends EventTarget {
         });
     }
 
-    getNotes(includeDeleted) {
+    getNotes(includeDeleted?: boolean): Promise<Note[]> {
         return this._transaction(
             ["notes"],
             "readonly",
@@ -93,15 +121,15 @@ class Storage extends EventTarget {
         );
     }
 
-    getNote(id) {
+    getNote(id: string): Promise<Note> {
         return this._transaction(["notes"], "readonly", (objectStores) => {
             return Storage.toPromise(objectStores[0].get(id));
         });
     }
 
-    updateNote(note, setSyncDate) {
+    updateNote(note: Note, setSyncDate?: boolean): Promise<void> {
         note.modified = new Date();
-        if (setSyncDate) {
+        if (setSyncDate && note.sync) {
             note.sync.lastSync = note.modified;
         }
 
@@ -110,7 +138,7 @@ class Storage extends EventTarget {
         });
     }
 
-    deleteNote(id, force) {
+    deleteNote(id: string, force?: boolean): Promise<void> {
         return this._transaction(
             ["notes"],
             "readwrite",
@@ -119,7 +147,7 @@ class Storage extends EventTarget {
                     objectStores[0].delete(id);
                 } else {
                     objectStores[0].get(id).onsuccess = (e) => {
-                        const note = e.target.result;
+                        const note: Note = (e.target as IDBRequest).result;
                         note._deleted = true;
                         objectStores[0].put(note);
                     };
@@ -128,7 +156,7 @@ class Storage extends EventTarget {
         );
     }
 
-    saveSettings(settings) {
+    saveSettings(settings: Settings): Promise<void> {
         return this._transaction(["settings"], "readwrite", (objectStores) => {
             for (const [name, value] of Object.entries(settings)) {
                 objectStores[0].put({
@@ -139,7 +167,7 @@ class Storage extends EventTarget {
         });
     }
 
-    loadSettings() {
+    loadSettings(): Promise<Settings> {
         return this._transaction(
             ["settings"],
             "readonly",

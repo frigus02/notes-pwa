@@ -1,8 +1,12 @@
 import { makeWebComponent } from "function-web-components";
 import { html, render } from "./notes-base-element.js";
 
-function notesMarkdownEditor({ value, setValue }) {
-    const onChange = (newValue) => {
+interface Props {
+    [key: string]: any;
+}
+
+function notesMarkdownEditor({ value, setValue }: Props) {
+    const onChange = (newValue: string) => {
         setValue(newValue, { eventName: "change" });
     };
 
@@ -21,7 +25,8 @@ function notesMarkdownEditor({ value, setValue }) {
         </style>
 
         <textarea
-            @input="${(e) => onChange(e.target.value)}"
+            @input="${(e: Event) =>
+                onChange((e.target as HTMLTextAreaElement).value)}"
             .value="${value}"
         ></textarea>
     `;

@@ -26,11 +26,11 @@ function notesPageSettings() {
         `,
     );
 
-    async function onSubmit(e) {
+    async function onSubmit(e: Event) {
         e.preventDefault();
-        const data = new FormData(e.target);
+        const data = new FormData(e.target as HTMLFormElement);
         const settings = {
-            gitHubPat: data.get("gh-pat").trim(),
+            gitHubPat: (data.get("gh-pat") as string | null)?.trim() ?? "",
         };
         await storage.saveSettings(settings);
         router.navigate("/");

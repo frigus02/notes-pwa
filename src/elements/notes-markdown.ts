@@ -2,7 +2,11 @@ import { makeWebComponent } from "function-web-components";
 import { html, render, unsafeHTML, until } from "./notes-base-element.js";
 import { markdownToHtml } from "./utils/worker.js";
 
-function notesMarkdown({ value }) {
+interface Props {
+    [key: string]: any;
+}
+
+function notesMarkdown({ value }: Props) {
     const rendered = markdownToHtml(value).then(
         (raw) => html` ${unsafeHTML(raw)} `,
     );

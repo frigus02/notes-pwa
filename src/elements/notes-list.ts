@@ -2,8 +2,13 @@ import { makeWebComponent } from "function-web-components";
 import { html, render, repeat } from "./notes-base-element.js";
 
 import { timeAgo } from "../shared/format.js";
+import { type Note } from "../shared/storage.js";
 
-function notesList({ dataNotes }) {
+interface Props {
+    [key: string]: any;
+}
+
+function notesList({ dataNotes }: Props) {
     if (!dataNotes) return;
     return html`
         <style>
@@ -56,14 +61,14 @@ function notesList({ dataNotes }) {
         <ul class="list">
             ${repeat(
                 dataNotes,
-                (note) => note.id,
-                (note) => html`
+                (note: Note) => note.id,
+                (note: Note) => html`
                     <li class="note-item">
                         <a href="/note/${note.id}">
                             <h2>${note.title}</h2>
                             <p>
                                 <span class="summary">${note.body}</span>
-                                <span>${timeAgo(note.modified)}</span>
+                                <span>${timeAgo(note.modified.getDate())}</span>
                             </p>
                         </a>
                     </li>

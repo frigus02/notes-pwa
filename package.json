@@ -12,11 +12,12 @@
   },
   "devDependencies": {
     "prettier": "3.6.2",
+    "typescript": "5.9.2",
     "vite": "7.1.6"
   },
   "scripts": {
     "start": "vite",
     "build": "vite build",
-    "format": "prettier --write \"*.{js,md}\" \"src/**/*.{js,md}\""
+    "format": "prettier --write \"*.{js,md}\" \"src/**/*.{js,ts,md}\""
   }
 }

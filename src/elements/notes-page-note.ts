@@ -7,7 +7,7 @@ import router from "./utils/router.js";
 
 import storage from "../shared/storage.js";
 
-function useToggleState(initialValue) {
+function useToggleState(initialValue: boolean) {
     const [value, setValue] = useState(initialValue);
     const toggle = () => {
         setValue(!value);
@@ -16,7 +16,11 @@ function useToggleState(initialValue) {
     return [value, toggle];
 }
 
-function notesPageNote({ dataState }) {
+interface Props {
+    [key: string]: any;
+}
+
+function notesPageNote({ dataState }: Props) {
     const [isEditing, toggleIsEditing] = useToggleState(false);
 
     const deleteNote = async () => {
@@ -25,7 +29,7 @@ function notesPageNote({ dataState }) {
     };
 
     const noteDetails = storage.getNote(dataState.noteId).then((note) => {
-        const onChange = async (e) => {
+        const onChange = async (e: CustomEvent) => {
             const updatedNote = e.detail;
             await storage.updateNote(updatedNote);
         };

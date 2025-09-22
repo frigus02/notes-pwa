@@ -3,12 +3,17 @@ import { html, render } from "./notes-base-element.js";
 import "./notes-markdown-editor.js";
 
 import { timeAgo } from "../shared/format.js";
+import type { Note } from "../shared/storage.js";
 
-function notesDetailsEdit({ dataNote, setDataNote }) {
+interface Props {
+    [key: string]: any;
+}
+
+function notesDetailsEdit({ dataNote, setDataNote }: Props) {
     if (!dataNote) return;
 
-    const onChange = (changedProps) => {
-        const newDataNote = Object.assign({}, dataNote, changedProps);
+    const onChange = (changedProps: Partial<Note>) => {
+        const newDataNote: Note = Object.assign({}, dataNote, changedProps);
         setDataNote(newDataNote, { eventName: "change" });
     };
 
@@ -48,14 +53,17 @@ function notesDetailsEdit({ dataNote, setDataNote }) {
                 aria-label="Note title"
                 type="text"
                 value="${dataNote.title}"
-                @change="${(e) => onChange({ title: e.target.value })}"
+                @change="${(e: Event) =>
+                    onChange({ title: (e.target as HTMLInputElement).value })}"
             />
         </h2>
-        <div class="metadata">Modified: ${timeAgo(dataNote.modified)}</div>
+        <div class="metadata">
+            Modified: ${timeAgo(dataNote.modified.getDate())}
+        </div>
         <notes-markdown-editor
             aria-label="Note content"
             .value="${dataNote.body}"
-            @change="${(e) => onChange({ body: e.detail })}"
+            @change="${(e: CustomEvent) => onChange({ body: e.detail })}"
         ></notes-markdown-editor>
     `;
 }

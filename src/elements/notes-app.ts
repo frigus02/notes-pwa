@@ -1,8 +1,11 @@
 import { render, html, dynamicElement, until } from "./notes-base-element.js";
 import { cssColors } from "./utils/colors.js";
-import router from "./utils/router.js";
+import router, { type Params } from "./utils/router.js";
 
 class NotesApp extends HTMLElement {
+    dataPage: string;
+    dataPageParams: Params;
+
     constructor() {
         super();
         this.dataPage = "";
@@ -25,9 +28,9 @@ class NotesApp extends HTMLElement {
         router.removeEventListener("change", this._onRouteChange);
     }
 
-    _onRouteChange(e) {
-        this.dataPage = e.detail.route;
-        this.dataPageParams = e.detail.params;
+    _onRouteChange(e: Event) {
+        this.dataPage = (e as CustomEvent).detail.route;
+        this.dataPageParams = (e as CustomEvent).detail.params;
         this.renderToDOM();
     }
 
@@ -37,11 +40,17 @@ class NotesApp extends HTMLElement {
             dataPageParams: this.dataPageParams,
         });
         if (result) {
-            render(result, this.shadowRoot);
+            render(result, this.shadowRoot!);
         }
     }
 
-    render({ dataPage, dataPageParams }) {
+    render({
+        dataPage,
+        dataPageParams,
+    }: {
+        dataPage: string;
+        dataPageParams: Params;
+    }) {
         const page = import(`./notes-page-${dataPage}.js`).then(() =>
             dynamicElement(`notes-page-${dataPage}`, {
                 dataState: Object.assign({}, dataPageParams),

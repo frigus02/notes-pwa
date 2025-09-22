@@ -1,6 +1,13 @@
-import storage from "../shared/storage.js";
+import storage, { type Note } from "../shared/storage.js";
 
-async function listDbxFiles(accessToken) {
+interface DbxFile {
+    id: string;
+    rev: string;
+    path_lower: string;
+    path_display: string;
+}
+
+async function listDbxFiles(accessToken: string): Promise<DbxFile[]> {
     // https://dropbox.github.io/dropbox-api-v2-explorer/#files_list_folder
     // https://dropbox.github.io/dropbox-api-v2-explorer/#files_list_folder/continue
 
@@ -20,9 +27,9 @@ async function listDbxFiles(accessToken) {
     );
     let result = await response.json();
 
-    const files = [...result.entries];
+    const files: DbxFile[] = [...result.entries];
     while (result.has_more) {
-        let response = await fetch(
+        response = await fetch(
             "https://api.dropboxapi.com/2/files/list_folder/continue",
             {
                 method: "POST",
@@ -35,7 +42,7 @@ async function listDbxFiles(accessToken) {
                 }),
             },
         );
-        let result = await response.json();
+        result = await response.json();
 
         files.push(...result.entries);
     }
@@ -43,7 +50,11 @@ async function listDbxFiles(accessToken) {
     return files;
 }
 
-async function downloadDbxFile(accessToken, dbxFile, note) {
+async function downloadDbxFile(
+    accessToken: string,
+    dbxFile: DbxFile,
+    note: Note,
+) {
     // https://dropbox.github.io/dropbox-api-v2-explorer/#files_download
 
     // Download file
@@ -59,11 +70,11 @@ async function downloadDbxFile(accessToken, dbxFile, note) {
             },
         },
     );
-    const metadata = JSON.parse(response.headers.get("dropbox-api-result"));
+    const metadata = JSON.parse(response.headers.get("dropbox-api-result")!);
     const contents = await response.text();
 
     // Update note
-    note.title = dbxFile.path_display.split("/").pop().split(".")[0];
+    note.title = dbxFile.path_display.split("/").pop()!.split(".")[0];
     note.body = contents;
     note.sync = {
         id: metadata.id,
@@ -72,7 +83,11 @@ async function downloadDbxFile(accessToken, dbxFile, note) {
     await storage.updateNote(note, true);
 }
 
-async function uploadDbxFile(accessToken, dbxFile, note) {
+async function uploadDbxFile(
+    accessToken: string,
+    dbxFile: DbxFile | null,
+    note: Note,
+) {
     // https://dropbox.github.io/dropbox-api-v2-explorer/#files_upload
 
     // Upload file
@@ -103,7 +118,7 @@ async function uploadDbxFile(accessToken, dbxFile, note) {
     await storage.updateNote(note, true);
 }
 
-async function deleteDbxFile(accessToken, dbxFile) {
+async function deleteDbxFile(accessToken: string, dbxFile: DbxFile) {
     // https://dropbox.github.io/dropbox-api-v2-explorer/#files_delete_v2
 
     await fetch("https://api.dropboxapi.com/2/files/delete_v2", {
@@ -118,11 +133,16 @@ async function deleteDbxFile(accessToken, dbxFile) {
     });
 }
 
-async function sync(accessToken) {
+async function sync(accessToken: string) {
     const notes = await storage.getNotes(true);
     const dbxFiles = await listDbxFiles(accessToken);
 
-    const items = dbxFiles.map((dbxFile) => ({
+    interface Item {
+        dbxFile: DbxFile | undefined;
+        note: Note | undefined;
+    }
+
+    const items: Item[] = dbxFiles.map((dbxFile) => ({
         dbxFile,
         note: notes.find((note) => note.sync && note.sync.id === dbxFile.id),
     }));
@@ -132,7 +152,7 @@ async function sync(accessToken) {
             .map((note) => ({
                 dbxFile:
                     note.sync &&
-                    dbxFiles.find((dbxFile) => dbxFile.id === note.sync.id),
+                    dbxFiles.find((dbxFile) => dbxFile.id === note.sync!.id),
                 note,
             })),
     );
@@ -140,7 +160,7 @@ async function sync(accessToken) {
     for (const item of items) {
         if (!item.note) {
             const note = await storage.createNote();
-            await downloadDbxFile(accessToken, item.dbxFile, note);
+            await downloadDbxFile(accessToken, item.dbxFile!, note);
         } else if (!item.dbxFile) {
             if (item.note.sync) {
                 item.note._deleted = true;
@@ -149,9 +169,9 @@ async function sync(accessToken) {
             }
         } else if (item.note._deleted) {
             await deleteDbxFile(accessToken, item.dbxFile);
-        } else if (item.note.sync.lastSync < item.note.modified) {
+        } else if ((item.note.sync?.lastSync ?? 0) < item.note.modified) {
             await uploadDbxFile(accessToken, item.dbxFile, item.note);
-        } else if (item.note.sync.rev !== item.dbxFile.rev) {
+        } else if (item.note.sync?.rev !== item.dbxFile.rev) {
             await downloadDbxFile(accessToken, item.dbxFile, item.note);
         }
     }

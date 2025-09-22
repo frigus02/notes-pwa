@@ -3,7 +3,6 @@ import sync from "./sync.js";
 
 marked.setOptions({
     gfm: true,
-    tables: false,
     breaks: true,
 });
 
@@ -12,8 +11,16 @@ const actions = {
     sync,
 };
 
+export type Action = keyof typeof actions;
+
+interface MessageData {
+    id: string;
+    action: Action;
+    args: [any];
+}
+
 addEventListener("message", async function (e) {
-    const { id, action, args } = e.data;
+    const { id, action, args } = e.data as MessageData;
     try {
         const result = await actions[action](...args);
         postMessage({ id, result });
