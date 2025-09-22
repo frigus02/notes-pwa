@@ -25,6 +25,7 @@ function notesPageList() {
                 pat: settings.gitHubPat,
                 repoOwner: settings.gitHubRepoOwner,
                 repoName: settings.gitHubRepoName,
+                dryRun: true,
             });
             alert("Sync done :-)");
         } catch (e) {

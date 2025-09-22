@@ -1,4 +1,5 @@
-import { type Action } from "../../worker/index.js";
+import type { Action } from "../../worker/index.js";
+import type { Options as SyncOptions } from "../../worker/sync.js";
 import { newId } from "../../shared/id.js";
 
 class WorkerRequestManager {
@@ -39,10 +40,7 @@ const instance = new WorkerRequestManager();
 
 const markdownToHtml = (markdown: string): Promise<string> =>
     instance.request("markdownToHtml", markdown) as Promise<string>;
-const sync = (options: {
-    pat: string;
-    repoOwner: string;
-    repoName: string;
-}): Promise<void> => instance.request("sync", options) as Promise<void>;
+const sync = (options: SyncOptions): Promise<void> =>
+    instance.request("sync", options) as Promise<void>;
 
 export { markdownToHtml, sync };

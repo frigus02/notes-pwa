@@ -4,17 +4,20 @@ export interface Options {
     pat: string;
     repoOwner: string;
     repoName: string;
+    dryRun: boolean;
 }
 
-async function ghGraphQL(
-    options: Options,
-    query: string,
-    variables: Record<string, string>,
-) {
+interface GraphQLRequest {
+    pat: string;
+    query: string;
+    variables: Record<string, unknown>;
+}
+
+async function ghGraphQL({ pat, query, variables }: GraphQLRequest) {
     const res = await fetch("https://api.github.com/graphql", {
         method: "POST",
         headers: {
-            authorization: `Bearer ${options.pat}`,
+            authorization: `Bearer ${pat}`,
         },
         body: JSON.stringify({
             query,
@@ -29,17 +32,18 @@ async function ghGraphQL(
     return result.data;
 }
 
-async function ghRest(
-    options: Options,
-    pathAndQuery: string,
-    init: RequestInit,
-) {
+interface RestRequest {
+    pat: string;
+    pathAndQuery: string;
+    apiVersion: string;
+}
+
+async function ghRest({ pat, pathAndQuery, apiVersion }: RestRequest) {
     const res = await fetch(`https://api.github.com` + pathAndQuery, {
-        ...init,
         headers: {
             accept: "application/vnd.github+json",
-            authorization: `Bearer ${options.pat}`,
-            ...init.headers,
+            authorization: `Bearer ${pat}`,
+            "X-GitHub-Api-Version": apiVersion,
         },
     });
     if (!res.ok) {
@@ -56,9 +60,9 @@ interface RepoHead {
 }
 
 async function getRepoHead(options: Options): Promise<RepoHead> {
-    const result = await ghGraphQL(
-        options,
-        `query($owner: String!, $name: String!) {
+    const result = await ghGraphQL({
+        pat: options.pat,
+        query: `query($owner: String!, $name: String!) {
           repository(owner: $owner, name: $name) {
             defaultBranchRef {
               id
@@ -68,14 +72,62 @@ async function getRepoHead(options: Options): Promise<RepoHead> {
             }
           }
         }`,
-        {
+        variables: {
             owner: options.repoOwner,
             name: options.repoName,
         },
-    );
+    });
     return {
         id: result.repository.defaultBranchRef.id,
         oid: result.repository.defaultBranchRef.target.oid,
+    };
+}
+
+interface CreateCommitRequest {
+    pat: string;
+    head: RepoHead;
+    message: string;
+    additions: Array<{ path: string; content: string }>;
+    deletions: Array<{ path: string }>;
+}
+
+async function createCommit({
+    pat,
+    head,
+    message,
+    additions,
+    deletions,
+}: CreateCommitRequest): Promise<RepoHead> {
+    const result = await ghGraphQL({
+        pat,
+        query: `mutation($branchId: String!, $headOid: String!, $fileChanges: FileChanges! $message: String!) {
+          createCommitOnBranch(input: {
+            branch: { id: $branchId },
+            expectedHeadOid: $headOid,
+            fileChanges: $fileChanges,
+            message: $message,
+          }) {
+            commit {
+              oid
+            }
+          }
+        }`,
+        variables: {
+            branchId: head.id,
+            headOid: head.oid,
+            fileChanges: {
+                additions: additions.map((addition) => ({
+                    path: addition.path,
+                    contents: btoa(addition.content),
+                })),
+                deletions,
+            },
+            message,
+        },
+    });
+    return {
+        id: head.id,
+        oid: result.createCommitOnBranch.commit.oid,
     };
 }
 
@@ -104,15 +156,11 @@ async function getTreeRecursive(
     options: Options,
     head: RepoHead,
 ): Promise<Blob[]> {
-    const result: GetTreesResponse = await ghRest(
-        options,
-        `/repos/${options.repoOwner}/${options.repoName}/git/trees/${head.oid}?recursive=1`,
-        {
-            headers: {
-                "X-GitHub-Api-Version": "2022-11-28",
-            },
-        },
-    );
+    const result: GetTreesResponse = await ghRest({
+        pat: options.pat,
+        pathAndQuery: `/repos/${options.repoOwner}/${options.repoName}/git/trees/${head.oid}?recursive=1`,
+        apiVersion: "2022-11-28",
+    });
     if (result.truncated) {
         throw new Error("trees truncated; not supported");
     }
@@ -120,6 +168,29 @@ async function getTreeRecursive(
     return result.tree
         .filter((item) => item.type === "blob" && item.path.endsWith(".md"))
         .map((item) => ({ path: item.path, sha: item.sha }) satisfies Blob);
+}
+
+interface GetBlobResponse {
+    content: string;
+    encoding: string;
+    url: string;
+    sha: string;
+    size: number | null;
+    node_id: string;
+    highlighted_content?: string;
+}
+
+async function getBlob(options: Options, blobSha: string): Promise<string> {
+    const result: GetBlobResponse = await ghRest({
+        pat: options.pat,
+        pathAndQuery: `/repos/${options.repoOwner}/${options.repoName}/git/blobs/${blobSha}`,
+        apiVersion: "2022-11-28",
+    });
+    if (result.encoding !== "base64") {
+        throw new Error("unsupported encoding: " + result.encoding);
+    }
+
+    return atob(result.content);
 }
 
 export async function sync(options: Options) {
@@ -130,24 +201,177 @@ export async function sync(options: Options) {
     const blobs = await getTreeRecursive(options, head);
     console.log("tree", blobs);
 
-    // loop through blobs
-    // - if matching note based on path
-    //   - update note.currentRemote --> if head differs, fetch blob content
-    //   - if note.currentRemote == note.lastSyncRemote == note.{body,deleted} --> all done
-    //   - if note.currentRemote != note.lastSyncRemote != note --> merge
-    //   - if note.currentRemote != note.lastSyncRemote --> update note.body
-    //   - if note.lastSyncRemote != note --> update remote
-    // - else --> create local note
-    //
-    // loop through notes not yet visited
-    // - if note has remote
-    //   - if note != note.lastSyncRemote --> recreate remote note?
-    //   - else --> delete local note
-    // - else --> create remote note
+    interface CreateLocalAction {
+        type: "create-local";
+        blob: Blob;
+        body: string;
+    }
+    interface UpdateLocalAction {
+        type: "update-local";
+        note: Note;
+        blob: Blob;
+        body: string;
+    }
+    interface DeleteLocalAction {
+        type: "delete-local";
+        note: Note;
+    }
+    interface CreateRemoteAction {
+        type: "create-remote";
+        note: Note;
+    }
+    interface UpdateRemoteAction {
+        type: "update-remote";
+        note: Note;
+    }
+    interface DeleteRemoteAction {
+        type: "delete-remote";
+        note: Note;
+    }
+    interface MergeAction {
+        type: "merge";
+        note: Note;
+        blob: Blob;
+        body: string;
+    }
+    type Action =
+        | CreateLocalAction
+        | UpdateLocalAction
+        | DeleteLocalAction
+        | CreateRemoteAction
+        | UpdateRemoteAction
+        | DeleteRemoteAction
+        | MergeAction;
+    const actions: Action[] = [];
 
-    // Remove deleted notes
-    const deletedNotes = notes.filter((note) => note.deleted);
-    for (const note of deletedNotes) {
-        await storage.deleteNote(note.id, true);
+    const seen = new Set<string>();
+    for (const blob of blobs) {
+        const note = notes.find((note) => note.path === blob.path);
+        if (note) {
+            seen.add(note.id);
+            if (blob.sha !== note.lastSyncRemote?.sha) {
+                const body =
+                    note.currentRemote?.sha === blob.sha
+                        ? note.currentRemote.body
+                        : await getBlob(options, blob.sha);
+                if (
+                    note.deleted ||
+                    note.body === body ||
+                    note.body === note.lastSyncRemote?.body
+                ) {
+                    // remote change only --> update local
+                    actions.push({ type: "update-local", note, blob, body });
+                } else {
+                    // remote and local change --> merge
+                    actions.push({ type: "merge", note, blob, body });
+                }
+            } else if (note.deleted) {
+                // local delete --> delete remote
+                actions.push({ type: "delete-remote", note });
+            } else if (note.body !== note.lastSyncRemote?.sha) {
+                // local change only --> update remote
+                actions.push({ type: "update-remote", note });
+            }
+        } else {
+            // create local note
+            const body = await getBlob(options, blob.sha);
+            actions.push({
+                type: "create-local",
+                blob,
+                body,
+            });
+        }
+    }
+
+    for (const note of notes) {
+        if (seen.has(note.id)) continue;
+        if (note.deleted) continue;
+        if (note.body !== note.lastSyncRemote?.body) {
+            // create remote
+            actions.push({ type: "create-remote", note });
+        } else {
+            // delete local
+            actions.push({ type: "delete-local", note });
+        }
+    }
+
+    console.log("actions", actions);
+
+    if (options.dryRun) {
+        console.log("dry run");
+        return;
+    }
+
+    const commit: CreateCommitRequest = {
+        pat: options.pat,
+        head,
+        additions: [],
+        deletions: [],
+        message: "Sync",
+    };
+    for (const action of actions) {
+        switch (action.type) {
+            case "create-local":
+                const newNote = await storage.createNote();
+                newNote.path = action.blob.path;
+                newNote.body = action.body;
+                newNote.currentRemote = {
+                    sha: action.blob.sha,
+                    body: action.body,
+                };
+                newNote.lastSyncRemote = newNote.currentRemote;
+                await storage.updateNote(newNote);
+                break;
+            case "update-local":
+                action.note.body = action.body;
+                action.note.deleted = false;
+                action.note.currentRemote = {
+                    sha: action.blob.sha,
+                    body: action.body,
+                };
+                action.note.lastSyncRemote = action.note.currentRemote;
+                await storage.updateNote(action.note);
+                break;
+            case "delete-local":
+                await storage.deleteNote(action.note.id, true);
+                break;
+            case "create-remote":
+            case "update-remote":
+                commit.additions.push({
+                    path: action.note.path,
+                    content: action.note.body,
+                });
+                break;
+            case "delete-remote":
+                commit.deletions.push({
+                    path: action.note.path,
+                });
+                break;
+            case "merge":
+                // TODO
+                break;
+        }
+    }
+    if (commit.additions.length > 0 || commit.deletions.length > 0) {
+        const newHead = await createCommit(commit);
+        const newBlobs = await getTreeRecursive(options, newHead);
+        for (const action of actions) {
+            switch (action.type) {
+                case "create-remote":
+                case "update-remote":
+                    action.note.currentRemote = {
+                        sha: newBlobs.find(
+                            (blob) => blob.path === action.note.path,
+                        )!.sha,
+                        body: action.note.body,
+                    };
+                    action.note.lastSyncRemote = action.note.currentRemote;
+                    await storage.updateNote(action.note);
+                    break;
+                case "delete-remote":
+                    await storage.deleteNote(action.note.id, true);
+                    break;
+            }
+        }
     }
 }
