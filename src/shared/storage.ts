@@ -88,8 +88,8 @@ class Storage extends EventTarget {
         const result = callback(objectStores);
 
         return new Promise((resolve, reject) => {
-            transaction.onerror = () => {
-                reject(transaction.error);
+            transaction.onerror = (e) => {
+                reject((e.target as IDBRequest).error);
             };
             transaction.oncomplete = () => {
                 resolve(result);
@@ -97,14 +97,15 @@ class Storage extends EventTarget {
         });
     }
 
-    createNote(): Promise<Note> {
+    createNote(params: Partial<Note> = {}): Promise<Note> {
         const note: Note = {
-            id: newId(),
             path: "new.md",
             body: "# New note",
-            modified: new Date(),
             deleted: false,
             lastSync: undefined,
+            ...params,
+            id: newId(),
+            modified: new Date(),
         };
         return this._transaction(["notes"], "readwrite", (objectStores) => {
             objectStores[0].add(note);

@@ -347,14 +347,14 @@ export async function sync(options: Options) {
     for (const action of actions) {
         switch (action.type) {
             case "create-local":
-                const newNote = await storage.createNote();
-                newNote.path = action.blob.path;
-                newNote.body = action.body;
-                newNote.lastSync = {
-                    sha: action.blob.sha,
+                await storage.createNote({
+                    path: action.blob.path,
                     body: action.body,
-                };
-                await storage.updateNote(newNote);
+                    lastSync: {
+                        sha: action.blob.sha,
+                        body: action.body,
+                    },
+                });
                 break;
             case "update-local":
                 action.note.body = action.body;
@@ -397,6 +397,7 @@ export async function sync(options: Options) {
                 break;
         }
     }
+    console.log("commit", commit);
     if (commit.additions.length > 0 || commit.deletions.length > 0) {
         head = await createCommit(commit);
         const newBlobs = await getTreeRecursive(options, head);
