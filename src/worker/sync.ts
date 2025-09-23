@@ -34,11 +34,14 @@ declare global {
     }
 }
 
-export interface Options {
+export interface SyncOptions {
+    dryRun: boolean;
+}
+
+interface Config {
     pat: string;
     repoOwner: string;
     repoName: string;
-    dryRun: boolean;
 }
 
 interface GraphQLRequest {
@@ -93,9 +96,9 @@ interface RepoHead {
     oid: string;
 }
 
-async function getRepoHead(options: Options): Promise<RepoHead> {
+async function getRepoHead(config: Config): Promise<RepoHead> {
     const result = await ghGraphQL({
-        pat: options.pat,
+        pat: config.pat,
         query: `query($owner: String!, $name: String!) {
           repository(owner: $owner, name: $name) {
             defaultBranchRef {
@@ -107,8 +110,8 @@ async function getRepoHead(options: Options): Promise<RepoHead> {
           }
         }`,
         variables: {
-            owner: options.repoOwner,
-            name: options.repoName,
+            owner: config.repoOwner,
+            name: config.repoName,
         },
     });
     return {
@@ -190,12 +193,12 @@ interface Blob {
 }
 
 async function getTreeRecursive(
-    options: Options,
+    config: Config,
     head: RepoHead,
 ): Promise<Blob[]> {
     const result: GetTreesResponse = await ghRest({
-        pat: options.pat,
-        pathAndQuery: `/repos/${options.repoOwner}/${options.repoName}/git/trees/${head.oid}?recursive=1`,
+        pat: config.pat,
+        pathAndQuery: `/repos/${config.repoOwner}/${config.repoName}/git/trees/${head.oid}?recursive=1`,
         apiVersion: "2022-11-28",
     });
     if (result.truncated) {
@@ -217,10 +220,10 @@ interface GetBlobResponse {
     highlighted_content?: string;
 }
 
-async function getBlob(options: Options, blobSha: string): Promise<string> {
+async function getBlob(config: Config, blobSha: string): Promise<string> {
     const result: GetBlobResponse = await ghRest({
-        pat: options.pat,
-        pathAndQuery: `/repos/${options.repoOwner}/${options.repoName}/git/blobs/${blobSha}`,
+        pat: config.pat,
+        pathAndQuery: `/repos/${config.repoOwner}/${config.repoName}/git/blobs/${blobSha}`,
         apiVersion: "2022-11-28",
     });
     if (result.encoding !== "base64") {
@@ -231,9 +234,23 @@ async function getBlob(options: Options, blobSha: string): Promise<string> {
     return decoder.decode(Uint8Array.fromBase64(result.content));
 }
 
-export async function sync(options: Options) {
+async function doSync(options: SyncOptions) {
     const settings = await storage.loadSettings();
-    let head = await getRepoHead(options);
+    if (
+        !settings.gitHubPat ||
+        !settings.gitHubRepoOwner ||
+        !settings.gitHubRepoName
+    ) {
+        throw new Error("Please configure sync in settings.");
+    }
+
+    const config: Config = {
+        pat: settings.gitHubPat,
+        repoOwner: settings.gitHubRepoOwner,
+        repoName: settings.gitHubRepoName,
+    };
+
+    let head = await getRepoHead(config);
     console.log("HEAD", head, "local head", settings.gitHubHead);
 
     if (
@@ -244,7 +261,7 @@ export async function sync(options: Options) {
         return;
     }
 
-    const blobs = await getTreeRecursive(options, head);
+    const blobs = await getTreeRecursive(config, head);
     console.log("blobs", blobs);
 
     const notes = await storage.getNotes(true);
@@ -298,7 +315,7 @@ export async function sync(options: Options) {
         if (note) {
             seen.add(note.id);
             if (blob.sha !== note.lastSync?.sha) {
-                const body = await getBlob(options, blob.sha);
+                const body = await getBlob(config, blob.sha);
                 if (
                     note.deleted ||
                     note.body === body ||
@@ -319,7 +336,7 @@ export async function sync(options: Options) {
             }
         } else {
             // create local note
-            const body = await getBlob(options, blob.sha);
+            const body = await getBlob(config, blob.sha);
             actions.push({
                 type: "create-local",
                 blob,
@@ -348,7 +365,7 @@ export async function sync(options: Options) {
     }
 
     const commit: CreateCommitRequest = {
-        pat: options.pat,
+        pat: config.pat,
         head,
         additions: [],
         deletions: [],
@@ -410,7 +427,7 @@ export async function sync(options: Options) {
     console.log("commit", commit);
     if (commit.additions.length > 0 || commit.deletions.length > 0) {
         head = await createCommit(commit);
-        const newBlobs = await getTreeRecursive(options, head);
+        const newBlobs = await getTreeRecursive(config, head);
         for (const action of actions) {
             switch (action.type) {
                 case "create-remote":
@@ -432,4 +449,18 @@ export async function sync(options: Options) {
     }
 
     await storage.saveSettings({ gitHubHead: head });
+}
+
+let isSyncing = false;
+export async function sync(options: SyncOptions) {
+    if (isSyncing) {
+        throw new Error("Sync already in progress");
+    }
+
+    isSyncing = true;
+    try {
+        await doSync(options);
+    } finally {
+        isSyncing = false;
+    }
 }

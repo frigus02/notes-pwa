@@ -1,5 +1,5 @@
 import type { Action } from "../../worker/index.js";
-import type { Options as SyncOptions } from "../../worker/sync.js";
+import type { SyncOptions } from "../../worker/sync.js";
 import { newId } from "../../shared/id.js";
 
 class WorkerRequestManager {
