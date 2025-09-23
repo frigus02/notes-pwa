@@ -12,7 +12,7 @@ export function splitNote(note: Note): [string, string] {
         return [title, body];
     }
 
-    return ["<no title>", note.body];
+    return [note.path, note.body];
 }
 
 export function timeAgo(date: number) {
