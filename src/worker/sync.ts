@@ -6,6 +6,9 @@ import {
     type Blob,
     type CreateCommitRequest,
     createCommit,
+    createCommitSingleAddition,
+    type RepoHead,
+    type CreateCommitSingleAdditionRequest,
 } from "../shared/github.js";
 import storage, { type Note } from "../shared/storage.js";
 import { reconcile } from "reconcile-text";
@@ -235,32 +238,28 @@ async function doSyncOne(note: Note) {
         throw new Error("Must do a full sync before syncing one.");
     }
 
-    const config: Config = {
-        pat: settings.gitHubPat,
-        repoOwner: settings.gitHubRepoOwner,
-        repoName: settings.gitHubRepoName,
-    };
-
-    const commit: CreateCommitRequest = {
-        pat: settings.gitHubPat,
-        head: settings.gitHubHead,
-        additions: [],
-        deletions: [],
-        message: `Sync ${note.path}`,
-    };
+    let newHead: RepoHead;
     if (note.deleted) {
-        commit.deletions.push({ path: note.path });
-    } else {
-        commit.additions.push({ path: note.path, content: note.body });
-    }
-
-    const newHead = await createCommit(commit);
-    if (note.deleted) {
+        const commit: CreateCommitRequest = {
+            pat: settings.gitHubPat,
+            head: settings.gitHubHead,
+            additions: [],
+            deletions: [{ path: note.path }],
+            message: `Delete ${note.path}`,
+        };
+        newHead = await createCommit(commit);
         await storage.deleteNote(note.id, true);
     } else {
-        const newBlobs = await getTreeRecursive(config, newHead);
+        const commit: CreateCommitSingleAdditionRequest = {
+            pat: settings.gitHubPat,
+            head: settings.gitHubHead,
+            addition: { path: note.path, content: note.body },
+            message: `Update ${note.path}`,
+        };
+        const result = await createCommitSingleAddition(commit);
+        newHead = result.head;
         note.lastSync = {
-            sha: newBlobs.find((blob) => blob.path === note.path)!.sha,
+            sha: result.blobSha,
             body: note.body,
         };
         await storage.updateNote(note);

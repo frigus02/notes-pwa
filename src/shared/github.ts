@@ -131,7 +131,7 @@ export async function createCommit({
     const encoder = new TextEncoder();
     const result = await ghGraphQL({
         pat,
-        query: `mutation($branchId: ID, $headOid: GitObjectID!, $fileChanges: FileChanges! $message: String!) {
+        query: `mutation($branchId: ID, $headOid: GitObjectID!, $fileChanges: FileChanges!, $message: String!) {
           createCommitOnBranch(input: {
             branch: { id: $branchId },
             expectedHeadOid: $headOid,
@@ -161,6 +161,68 @@ export async function createCommit({
     return {
         id: head.id,
         oid: result.createCommitOnBranch.commit.oid,
+    };
+}
+
+export interface CreateCommitSingleAdditionRequest {
+    pat: string;
+    head: RepoHead;
+    message: string;
+    addition: { path: string; content: string };
+}
+
+export interface CreateCommitSingleAdditionReponse {
+    head: RepoHead;
+    blobSha: string;
+}
+
+export async function createCommitSingleAddition({
+    pat,
+    head,
+    message,
+    addition,
+}: CreateCommitSingleAdditionRequest): Promise<CreateCommitSingleAdditionReponse> {
+    const encoder = new TextEncoder();
+    const result = await ghGraphQL({
+        pat,
+        query: `mutation($branchId: ID, $headOid: GitObjectID!, $path: String!, $contents: Base64String!, $message: String!) {
+          createCommitOnBranch(input: {
+            branch: { id: $branchId },
+            expectedHeadOid: $headOid,
+            fileChanges: {
+              additions: [
+                {
+                  path: $path,
+                  contents: $contents,
+                }
+              ]
+            },
+            message: {
+              headline: $message
+            }
+          }) {
+            commit {
+              oid
+              file(path: $path) {
+                oid
+              }
+            }
+          }
+        }`,
+        variables: {
+            branchId: head.id,
+            headOid: head.oid,
+            path: addition.path,
+            contents: encoder.encode(addition.content).toBase64(),
+            message,
+        },
+    });
+    return {
+        head: {
+            id: head.id,
+            oid: result.createCommitOnBranch.commit.oid,
+        },
+        blobSha: result.createCommitOnBranch.commit.file.oid,
     };
 }
 
@@ -213,7 +275,10 @@ interface GetBlobResponse {
     highlighted_content?: string;
 }
 
-export async function getBlob(config: Config, blobSha: string): Promise<string> {
+export async function getBlob(
+    config: Config,
+    blobSha: string,
+): Promise<string> {
     const result: GetBlobResponse = await ghRest({
         pat: config.pat,
         pathAndQuery: `/repos/${config.repoOwner}/${config.repoName}/git/blobs/${blobSha}`,

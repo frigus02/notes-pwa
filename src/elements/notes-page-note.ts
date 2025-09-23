@@ -6,6 +6,7 @@ import router from "./utils/router.js";
 
 import storage from "../shared/storage.js";
 import { splitNote } from "../shared/format.js";
+import { sync } from "./utils/worker.js";
 
 interface Props {
     [key: string]: any;
@@ -16,8 +17,11 @@ function notesPageNote({ dataState }: Props) {
         router.navigate(`/note/${dataState.noteId}/edit`);
     };
     const deleteNote = async () => {
-        await storage.deleteNote(dataState.noteId);
-        router.navigate("/");
+        if (confirm("Delete note?")) {
+            await storage.deleteNote(dataState.noteId);
+            sync.one(await storage.getNote(dataState.noteId));
+            router.navigate("/");
+        }
     };
 
     const result = storage.getNote(dataState.noteId).then((note) => {
