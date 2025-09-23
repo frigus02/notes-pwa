@@ -121,9 +121,11 @@ class Storage extends EventTarget {
             "readonly",
             async (objectStores) => {
                 const modifiedIndex = objectStores[0].index("modified");
-                let notes = await Storage.toPromise(modifiedIndex.getAll());
+                let notes: Note[] = await Storage.toPromise(
+                    modifiedIndex.getAll(),
+                );
                 if (!includeDeleted) {
-                    notes = notes.filter((note) => !note._deleted);
+                    notes = notes.filter((note) => !note.deleted);
                 }
 
                 return notes.reverse();
