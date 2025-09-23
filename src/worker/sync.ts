@@ -134,12 +134,14 @@ async function createCommit({
     const encoder = new TextEncoder();
     const result = await ghGraphQL({
         pat,
-        query: `mutation($branchId: String!, $headOid: String!, $fileChanges: FileChanges! $message: String!) {
+        query: `mutation($branchId: ID, $headOid: GitObjectID!, $fileChanges: FileChanges! $message: String!) {
           createCommitOnBranch(input: {
             branch: { id: $branchId },
             expectedHeadOid: $headOid,
             fileChanges: $fileChanges,
-            message: $message,
+            message: {
+              headline: $message
+            }
           }) {
             commit {
               oid
