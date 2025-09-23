@@ -1,5 +1,38 @@
 import storage, { type Note } from "../shared/storage.js";
 
+// Note available in TypeScript types, yet: https://github.com/microsoft/TypeScript/issues/61695
+declare global {
+    interface Uint8ArrayConstructor {
+        /**
+         * Creates a new `Uint8Array` from a base64-encoded string.
+         * @param string The base64-encoded string.
+         * @param options If provided, specifies the alphabet and handling of the last chunk.
+         * @returns A new `Uint8Array` instance.
+         * @throws {SyntaxError} If the input string contains characters outside the specified alphabet, or if the last
+         * chunk is inconsistent with the `lastChunkHandling` option.
+         */
+        fromBase64(
+            string: string,
+            options?: {
+                alphabet?: "base64" | "base64url";
+                lastChunkHandling?: "loose" | "strict" | "stop-before-partial";
+            },
+        ): Uint8Array<ArrayBuffer>;
+    }
+
+    interface Uint8Array<TArrayBuffer extends ArrayBufferLike> {
+        /**
+         * Converts the `Uint8Array` to a base64-encoded string.
+         * @param options If provided, sets the alphabet and padding behavior used.
+         * @returns A base64-encoded string.
+         */
+        toBase64(options?: {
+            alphabet?: "base64" | "base64url";
+            omitPadding?: boolean;
+        }): string;
+    }
+}
+
 export interface Options {
     pat: string;
     repoOwner: string;
@@ -98,6 +131,7 @@ async function createCommit({
     additions,
     deletions,
 }: CreateCommitRequest): Promise<RepoHead> {
+    const encoder = new TextEncoder();
     const result = await ghGraphQL({
         pat,
         query: `mutation($branchId: String!, $headOid: String!, $fileChanges: FileChanges! $message: String!) {
@@ -118,7 +152,7 @@ async function createCommit({
             fileChanges: {
                 additions: additions.map((addition) => ({
                     path: addition.path,
-                    contents: btoa(addition.content),
+                    contents: encoder.encode(addition.content).toBase64(),
                 })),
                 deletions,
             },
@@ -190,7 +224,8 @@ async function getBlob(options: Options, blobSha: string): Promise<string> {
         throw new Error("unsupported encoding: " + result.encoding);
     }
 
-    return atob(result.content);
+    const decoder = new TextDecoder();
+    return decoder.decode(Uint8Array.fromBase64(result.content));
 }
 
 export async function sync(options: Options) {
