@@ -5,43 +5,59 @@ import "./notes-details.js";
 import "./notes-toolbar.js";
 import router from "./utils/router.js";
 
-import storage from "../shared/storage.js";
-
-function useToggleState(initialValue: boolean) {
-    const [value, setValue] = useState(initialValue);
-    const toggle = () => {
-        setValue(!value);
-    };
-
-    return [value, toggle];
-}
+import storage, { type Note } from "../shared/storage.js";
+import { splitNote } from "../shared/format.js";
 
 interface Props {
     [key: string]: any;
 }
 
 function notesPageNote({ dataState }: Props) {
-    const [isEditing, toggleIsEditing] = useToggleState(false);
+    const [isEditing, setIsEditing] = useState(false);
+    const [editedNote, setEditedNote] = useState<Note | null>(null);
 
+    const edit = () => setIsEditing(true);
     const deleteNote = async () => {
         await storage.deleteNote(dataState.noteId);
         router.navigate("/");
     };
 
-    const noteDetails = storage.getNote(dataState.noteId).then((note) => {
-        const onChange = async (e: CustomEvent) => {
-            const updatedNote = e.detail;
-            await storage.updateNote(updatedNote);
+    const result = storage.getNote(dataState.noteId).then((note) => {
+        const cancel = () => {
+            setIsEditing(false);
+            setEditedNote(null);
         };
-
-        return isEditing
-            ? html`
-                  <notes-details-edit
-                      .dataNote="${note}"
-                      @change="${onChange}"
-                  ></notes-details-edit>
-              `
-            : html` <notes-details .dataNote="${note}"></notes-details> `;
+        const save = async () => {
+            setIsEditing(false);
+            if (editedNote) {
+                await storage.updateNote(editedNote);
+            }
+            window.location.reload();
+        };
+        const noteTitle = splitNote(editedNote ?? note)[0];
+        return html`
+            <notes-toolbar>
+                ${noteTitle}
+                ${isEditing
+                    ? html`<button slot="actions" @click="${cancel}">
+                              Cancel
+                          </button>
+                          <button slot="actions" @click="${save}">Save</button>`
+                    : html`<button slot="actions" @click="${edit}">Edit</button>
+                          <button slot="actions" @click="${deleteNote}">
+                              Delete
+                          </button>`}
+            </notes-toolbar>
+            ${isEditing
+                ? html`
+                      <notes-details-edit
+                          .dataNote="${editedNote ?? note}"
+                          @change="${(e: CustomEvent) =>
+                              setEditedNote(e.detail)}"
+                      ></notes-details-edit>
+                  `
+                : html` <notes-details .dataNote="${note}"></notes-details> `}
+        `;
     });
 
     return html`
@@ -63,12 +79,7 @@ function notesPageNote({ dataState }: Props) {
             }
         </style>
 
-        <notes-toolbar>
-            Notes
-            <button slot="actions" @click="${toggleIsEditing}">Edit</button>
-            <button slot="actions" @click="${deleteNote}">Delete</button>
-        </notes-toolbar>
-        ${until(noteDetails, "Loading...")}
+        ${until(result, html`<notes-toolbar>Loading...</notes-toolbar>`)}
     `;
 }
 

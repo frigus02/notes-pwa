@@ -7,7 +7,6 @@ export interface Note {
     modified: Date;
     deleted: boolean;
     lastSync: { body: string; sha: string } | undefined;
-    pendingSync: { body: string; sha: string } | undefined;
 }
 
 const NOTES: Array<Pick<Note, "path" | "body">> = [
@@ -62,7 +61,6 @@ class Storage extends EventTarget {
                             modified: new Date(),
                             deleted: false,
                             lastSync: undefined,
-                            pendingSync: undefined,
                         };
                         notesObjectStore.add(newNote);
                     });
@@ -107,7 +105,6 @@ class Storage extends EventTarget {
             modified: new Date(),
             deleted: false,
             lastSync: undefined,
-            pendingSync: undefined,
         };
         return this._transaction(["notes"], "readwrite", (objectStores) => {
             objectStores[0].add(note);

@@ -10,11 +10,8 @@ interface Props {
 
 function notesMetadata({ dataNote }: Props) {
     if (!dataNote) return;
-    const synced = dataNote.pendingSync
-        ? "requires merge"
-        : dataNote.lastSync?.body === dataNote.body
-          ? "synced"
-          : "modified";
+    const synced =
+        dataNote.lastSync?.body === dataNote.body ? "synced" : "modified";
     return html`
         <style>
             :host {

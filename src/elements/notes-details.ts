@@ -12,7 +12,7 @@ interface Props {
 function notesDetails({ dataNote }: Props) {
     if (!dataNote) return;
 
-    const [title, body] = splitNote(dataNote);
+    const [_title, body] = splitNote(dataNote);
 
     return html`
         <style>
@@ -29,7 +29,6 @@ function notesDetails({ dataNote }: Props) {
             }
         </style>
 
-        <h2>${title}</h2>
         <notes-metadata .dataNote="${dataNote}"></notes-metadata>
         <notes-markdown .value="${body}"></notes-markdown>
     `;

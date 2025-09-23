@@ -1,4 +1,5 @@
 import storage, { type Note } from "../shared/storage.js";
+import { reconcile } from "reconcile-text";
 
 // Note available in TypeScript types, yet: https://github.com/microsoft/TypeScript/issues/61695
 declare global {
@@ -362,7 +363,6 @@ export async function sync(options: Options) {
                     sha: action.blob.sha,
                     body: action.body,
                 };
-                action.note.pendingSync = undefined;
                 await storage.updateNote(action.note);
                 break;
             case "delete-local":
@@ -381,11 +381,19 @@ export async function sync(options: Options) {
                 });
                 break;
             case "merge":
-                action.note.pendingSync = {
-                    sha: action.blob.sha,
-                    body: action.body,
-                };
+                const result = reconcile(
+                    /*original*/ action.note.lastSync?.body ?? "",
+                    /*left*/ action.note.body,
+                    /*right*/ action.body,
+                );
+                // update local
+                action.note.body = result.text;
                 await storage.updateNote(action.note);
+                // update remote
+                commit.additions.push({
+                    path: action.note.path,
+                    content: result.text,
+                });
                 break;
         }
     }
@@ -396,13 +404,13 @@ export async function sync(options: Options) {
             switch (action.type) {
                 case "create-remote":
                 case "update-remote":
+                case "merge":
                     action.note.lastSync = {
                         sha: newBlobs.find(
                             (blob) => blob.path === action.note.path,
                         )!.sha,
                         body: action.note.body,
                     };
-                    action.note.pendingSync = undefined;
                     await storage.updateNote(action.note);
                     break;
                 case "delete-remote":
