@@ -7,8 +7,12 @@ export const MS_DAY = MS_HOUR * 24;
 
 export function splitNote(note: Note): [string, string] {
     if (note.body.startsWith("# ")) {
-        const title = note.body.substring(2, note.body.indexOf("\n")).trim();
-        const body = note.body.substring(note.body.indexOf("\n") + 1).trim();
+        const firstLineEnd = note.body.indexOf("\n");
+        if (firstLineEnd === -1) {
+            return [note.body.substring(1).trim(), ""];
+        }
+        const title = note.body.substring(2, firstLineEnd).trim();
+        const body = note.body.substring(firstLineEnd + 1).trim();
         return [title, body];
     }
 
