@@ -232,12 +232,22 @@ async function getBlob(options: Options, blobSha: string): Promise<string> {
 }
 
 export async function sync(options: Options) {
-    const notes = await storage.getNotes(true);
-
+    const settings = await storage.loadSettings();
     let head = await getRepoHead(options);
-    console.log("HEAD", head);
+    console.log("HEAD", head, "local head", settings.gitHubHead);
+
+    if (
+        settings.gitHubHead?.id === head.id &&
+        settings.gitHubHead?.oid === head.oid
+    ) {
+        console.log("Up to date");
+        return;
+    }
+
     const blobs = await getTreeRecursive(options, head);
-    console.log("tree", blobs);
+    console.log("blobs", blobs);
+
+    const notes = await storage.getNotes(true);
 
     interface CreateLocalAction {
         type: "create-local";
