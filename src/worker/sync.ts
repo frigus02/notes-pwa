@@ -34,10 +34,6 @@ declare global {
     }
 }
 
-export interface SyncOptions {
-    dryRun: boolean;
-}
-
 interface Config {
     pat: string;
     repoOwner: string;
@@ -234,7 +230,7 @@ async function getBlob(config: Config, blobSha: string): Promise<string> {
     return decoder.decode(Uint8Array.fromBase64(result.content));
 }
 
-async function doSync(options: SyncOptions) {
+async function doSync() {
     const settings = await storage.loadSettings();
     if (
         !settings.gitHubPat ||
@@ -359,11 +355,6 @@ async function doSync(options: SyncOptions) {
 
     console.log("actions", actions);
 
-    if (options.dryRun) {
-        console.log("dry run");
-        return;
-    }
-
     const commit: CreateCommitRequest = {
         pat: config.pat,
         head,
@@ -452,14 +443,14 @@ async function doSync(options: SyncOptions) {
 }
 
 let isSyncing = false;
-export async function sync(options: SyncOptions) {
+export async function sync() {
     if (isSyncing) {
         throw new Error("Sync already in progress");
     }
 
     isSyncing = true;
     try {
-        await doSync(options);
+        await doSync();
     } finally {
         isSyncing = false;
     }

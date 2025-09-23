@@ -29,3 +29,10 @@ export function timeAgo(date: number) {
             ? `${Math.floor(diff / MS_HOUR)} hours ago`
             : `${Math.floor(diff / MS_DAY)} days ago`;
 }
+
+export function shortDate(date: Date) {
+    return new Intl.DateTimeFormat(undefined, {
+        dateStyle: "short",
+        timeStyle: "short",
+    }).format(date);
+}

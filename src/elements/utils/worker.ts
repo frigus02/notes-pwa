@@ -1,5 +1,4 @@
 import type { Action } from "../../worker/index.js";
-import type { SyncOptions } from "../../worker/sync.js";
 import { newId } from "../../shared/id.js";
 
 class WorkerRequestManager {
@@ -38,9 +37,56 @@ class WorkerRequestManager {
 
 const instance = new WorkerRequestManager();
 
+interface SyncError {
+    type: "error";
+    error: Error;
+    date: Date;
+}
+interface SyncSucess {
+    type: "success";
+    date: Date;
+}
+type SyncResult = SyncError | SyncSucess;
+class Sync extends EventTarget {
+    private _state: "idle" | "syncing" = "idle";
+    private _lastResult: SyncResult | undefined = undefined;
+
+    get state() {
+        return this._state;
+    }
+
+    get lastResult() {
+        return this._lastResult;
+    }
+
+    start(): void {
+        if (this._state === "syncing") {
+            return;
+        }
+
+        // don't await
+        this.doStart();
+    }
+
+    private async doStart() {
+        try {
+            this._state = "syncing";
+            this.dispatchEvent(new Event("sync-start"));
+            await instance.request("sync");
+            this._lastResult = { type: "success", date: new Date() };
+        } catch (e) {
+            const error = e instanceof Error ? e : new Error("error");
+            this._lastResult = { type: "error", date: new Date(), error };
+        } finally {
+            this._state = "idle";
+            this.dispatchEvent(new Event("sync-end"));
+        }
+    }
+}
+
 const markdownToHtml = (markdown: string): Promise<string> =>
     instance.request("markdownToHtml", markdown) as Promise<string>;
-const sync = (options: SyncOptions): Promise<void> =>
-    instance.request("sync", options) as Promise<void>;
+
+const sync = new Sync();
 
 export { markdownToHtml, sync };

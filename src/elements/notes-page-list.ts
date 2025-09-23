@@ -14,16 +14,8 @@ function notesPageList() {
             (notes) => html` <notes-list .dataNotes="${notes}"></notes-list> `,
         );
 
-    const syncNotes = async () => {
-        try {
-            await sync({
-                dryRun: true,
-            });
-            alert("Sync done :-)");
-        } catch (e) {
-            console.error(e);
-            alert("Sync failed. Look in the console for details.");
-        }
+    const syncNotes = () => {
+        sync.start();
     };
 
     const createNote = async () => {
