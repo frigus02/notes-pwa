@@ -5,6 +5,7 @@ import router from "./utils/router.js";
 
 import storage from "../shared/storage.js";
 import { splitNote } from "../shared/format.js";
+import { sync } from "./utils/worker.js";
 
 interface Props {
     [key: string]: any;
@@ -23,8 +24,10 @@ function notesPageEdit({ dataState }: Props) {
                 ...note,
                 body: (data.get("body") as string | null) ?? "",
             });
+            sync.one(await storage.getNote(note.id));
             router.navigate(`/note/${dataState.noteId}`);
         };
+
         const noteTitle = splitNote(note)[0];
         return html`
             <form @submit="${onSubmit}">

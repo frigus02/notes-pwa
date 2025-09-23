@@ -1,5 +1,6 @@
 import type { Action } from "../../worker/index.js";
 import { newId } from "../../shared/id.js";
+import type { Note } from "../../shared/storage.js";
 
 class WorkerRequestManager {
     private _requests: Record<
@@ -59,20 +60,29 @@ class Sync extends EventTarget {
         return this._lastResult;
     }
 
-    start(): void {
+    all(): void {
         if (this._state === "syncing") {
             return;
         }
 
         // don't await
-        this.doStart();
+        this.start("syncAll");
     }
 
-    private async doStart() {
+    one(note: Note): void {
+        if (this._state === "syncing") {
+            return;
+        }
+
+        // don't await
+        this.start("syncOne", note);
+    }
+
+    private async start(type: "syncAll" | "syncOne", ...args: any[]) {
         try {
             this._state = "syncing";
             this.dispatchEvent(new Event("sync-start"));
-            await instance.request("sync");
+            await instance.request(type, ...args);
             this._lastResult = { type: "success", date: new Date() };
         } catch (e) {
             const error = e instanceof Error ? e : new Error("error");

@@ -41,7 +41,7 @@ class NotesApp extends HTMLElement {
         router.addEventListener("change", this._onRouteChange);
         sync.addEventListener("sync-start", this._onSyncChange);
         sync.addEventListener("sync-end", this._onSyncChange);
-        sync.start();
+        sync.all();
     }
 
     disconnectedCallback() {

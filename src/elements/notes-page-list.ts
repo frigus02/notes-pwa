@@ -15,7 +15,7 @@ function notesPageList() {
         );
 
     const syncNotes = () => {
-        sync.start();
+        sync.all();
     };
 
     const createNote = async () => {
