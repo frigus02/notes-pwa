@@ -6,8 +6,8 @@ export interface Note {
     body: string;
     modified: Date;
     deleted: boolean;
-    lastSyncRemote: { body: string; sha: string } | undefined;
-    currentRemote: { body: string; sha: string } | undefined;
+    lastSync: { body: string; sha: string } | undefined;
+    pendingSync: { body: string; sha: string } | undefined;
 }
 
 const NOTES: Array<Pick<Note, "path" | "body">> = [
@@ -21,6 +21,7 @@ export interface Settings {
     gitHubPat: string;
     gitHubRepoOwner: string;
     gitHubRepoName: string;
+    gitHubHead: { id: string; oid: string };
 }
 
 class Storage extends EventTarget {
@@ -60,8 +61,8 @@ class Storage extends EventTarget {
                             id: newId(),
                             modified: new Date(),
                             deleted: false,
-                            lastSyncRemote: undefined,
-                            currentRemote: undefined,
+                            lastSync: undefined,
+                            pendingSync: undefined,
                         };
                         notesObjectStore.add(newNote);
                     });
@@ -105,8 +106,8 @@ class Storage extends EventTarget {
             body: "# New note",
             modified: new Date(),
             deleted: false,
-            lastSyncRemote: undefined,
-            currentRemote: undefined,
+            lastSync: undefined,
+            pendingSync: undefined,
         };
         return this._transaction(["notes"], "readwrite", (objectStores) => {
             objectStores[0].add(note);
@@ -161,7 +162,7 @@ class Storage extends EventTarget {
         );
     }
 
-    saveSettings(settings: Settings): Promise<void> {
+    saveSettings(settings: Partial<Settings>): Promise<void> {
         return this._transaction(["settings"], "readwrite", (objectStores) => {
             for (const [name, value] of Object.entries(settings)) {
                 objectStores[0].put({
@@ -172,7 +173,7 @@ class Storage extends EventTarget {
         });
     }
 
-    loadSettings(): Promise<Settings> {
+    loadSettings(): Promise<Partial<Settings>> {
         return this._transaction(
             ["settings"],
             "readonly",

@@ -16,7 +16,11 @@ function notesPageList() {
 
     const syncNotes = async () => {
         const settings = await storage.loadSettings();
-        if (!settings.gitHubPat) {
+        if (
+            !settings.gitHubPat ||
+            !settings.gitHubRepoOwner ||
+            !settings.gitHubRepoName
+        ) {
             alert("Please configure in Settings.");
             return;
         }

@@ -9,7 +9,7 @@ function notesPageSettings() {
     const form = storage.loadSettings().then(
         (settings) => html`
             <form @submit="${onSubmit}">
-                <fieldset>
+                <div class="field">
                     <label for="gh-pat">GitHub PAT</label>
                     <input
                         id="gh-pat"
@@ -21,23 +21,23 @@ function notesPageSettings() {
                         GitHub Personal Access Token. Requires scopes: Contents
                         read and write
                     </div>
-                </fieldset>
-                <fieldset>
+                </div>
+                <div class="field">
                     <label for="gh-repo-owner">GitHub Repo Owner</label>
                     <input
                         id="gh-repo-owner"
                         name="gh-repo-owner"
                         value=${settings.gitHubRepoOwner ?? ""}
                     />
-                </fieldset>
-                <fieldset>
+                </div>
+                <div class="field">
                     <label for="gh-repo-name">GitHub Repo Name</label>
                     <input
                         id="gh-repo-name"
                         name="gh-repo-name"
                         value=${settings.gitHubRepoName ?? ""}
                     />
-                </fieldset>
+                </div>
                 <input type="submit" value="Save" />
             </form>
         `,
@@ -63,8 +63,14 @@ function notesPageSettings() {
                 display: block;
             }
 
-            input {
-                display: block;
+            form {
+                padding: 8px;
+            }
+
+            .field {
+                display: flex;
+                flex-direction: column;
+                margin-bottom: 1em;
             }
 
             .hint {

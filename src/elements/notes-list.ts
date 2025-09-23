@@ -1,7 +1,7 @@
 import { makeWebComponent } from "function-web-components";
 import { html, render, repeat } from "./notes-base-element.js";
 
-import { getNoteTitle, timeAgo } from "../shared/format.js";
+import { splitNote, timeAgo } from "../shared/format.js";
 import { type Note } from "../shared/storage.js";
 
 interface Props {
@@ -65,9 +65,11 @@ function notesList({ dataNotes }: Props) {
                 (note: Note) => html`
                     <li class="note-item">
                         <a href="/note/${note.id}">
-                            <h2>${getNoteTitle(note)}</h2>
+                            <h2>${splitNote(note)[0]}</h2>
                             <p>
-                                <span class="summary">${note.body}</span>
+                                <span class="summary"
+                                    >${splitNote(note)[1]}</span
+                                >
                                 <span>${timeAgo(note.modified.getTime())}</span>
                             </p>
                         </a>

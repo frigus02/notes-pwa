@@ -196,7 +196,7 @@ async function getBlob(options: Options, blobSha: string): Promise<string> {
 export async function sync(options: Options) {
     const notes = await storage.getNotes(true);
 
-    const head = await getRepoHead(options);
+    let head = await getRepoHead(options);
     console.log("HEAD", head);
     const blobs = await getTreeRecursive(options, head);
     console.log("tree", blobs);
@@ -249,15 +249,12 @@ export async function sync(options: Options) {
         const note = notes.find((note) => note.path === blob.path);
         if (note) {
             seen.add(note.id);
-            if (blob.sha !== note.lastSyncRemote?.sha) {
-                const body =
-                    note.currentRemote?.sha === blob.sha
-                        ? note.currentRemote.body
-                        : await getBlob(options, blob.sha);
+            if (blob.sha !== note.lastSync?.sha) {
+                const body = await getBlob(options, blob.sha);
                 if (
                     note.deleted ||
                     note.body === body ||
-                    note.body === note.lastSyncRemote?.body
+                    note.body === note.lastSync?.body
                 ) {
                     // remote change only --> update local
                     actions.push({ type: "update-local", note, blob, body });
@@ -268,7 +265,7 @@ export async function sync(options: Options) {
             } else if (note.deleted) {
                 // local delete --> delete remote
                 actions.push({ type: "delete-remote", note });
-            } else if (note.body !== note.lastSyncRemote?.sha) {
+            } else if (note.body !== note.lastSync?.sha) {
                 // local change only --> update remote
                 actions.push({ type: "update-remote", note });
             }
@@ -286,7 +283,7 @@ export async function sync(options: Options) {
     for (const note of notes) {
         if (seen.has(note.id)) continue;
         if (note.deleted) continue;
-        if (note.body !== note.lastSyncRemote?.body) {
+        if (note.body !== note.lastSync?.body) {
             // create remote
             actions.push({ type: "create-remote", note });
         } else {
@@ -315,21 +312,20 @@ export async function sync(options: Options) {
                 const newNote = await storage.createNote();
                 newNote.path = action.blob.path;
                 newNote.body = action.body;
-                newNote.currentRemote = {
+                newNote.lastSync = {
                     sha: action.blob.sha,
                     body: action.body,
                 };
-                newNote.lastSyncRemote = newNote.currentRemote;
                 await storage.updateNote(newNote);
                 break;
             case "update-local":
                 action.note.body = action.body;
                 action.note.deleted = false;
-                action.note.currentRemote = {
+                action.note.lastSync = {
                     sha: action.blob.sha,
                     body: action.body,
                 };
-                action.note.lastSyncRemote = action.note.currentRemote;
+                action.note.pendingSync = undefined;
                 await storage.updateNote(action.note);
                 break;
             case "delete-local":
@@ -348,24 +344,28 @@ export async function sync(options: Options) {
                 });
                 break;
             case "merge":
-                // TODO
+                action.note.pendingSync = {
+                    sha: action.blob.sha,
+                    body: action.body,
+                };
+                await storage.updateNote(action.note);
                 break;
         }
     }
     if (commit.additions.length > 0 || commit.deletions.length > 0) {
-        const newHead = await createCommit(commit);
-        const newBlobs = await getTreeRecursive(options, newHead);
+        head = await createCommit(commit);
+        const newBlobs = await getTreeRecursive(options, head);
         for (const action of actions) {
             switch (action.type) {
                 case "create-remote":
                 case "update-remote":
-                    action.note.currentRemote = {
+                    action.note.lastSync = {
                         sha: newBlobs.find(
                             (blob) => blob.path === action.note.path,
                         )!.sha,
                         body: action.note.body,
                     };
-                    action.note.lastSyncRemote = action.note.currentRemote;
+                    action.note.pendingSync = undefined;
                     await storage.updateNote(action.note);
                     break;
                 case "delete-remote":
@@ -374,4 +374,6 @@ export async function sync(options: Options) {
             }
         }
     }
+
+    await storage.saveSettings({ gitHubHead: head });
 }

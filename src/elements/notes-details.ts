@@ -1,8 +1,9 @@
 import { makeWebComponent } from "function-web-components";
 import { html, render } from "./notes-base-element.js";
 import "./notes-markdown.js";
+import "./notes-metadata.js";
 
-import { timeAgo } from "../shared/format.js";
+import { splitNote } from "../shared/format.js";
 
 interface Props {
     [key: string]: any;
@@ -10,6 +11,9 @@ interface Props {
 
 function notesDetails({ dataNote }: Props) {
     if (!dataNote) return;
+
+    const [title, body] = splitNote(dataNote);
+
     return html`
         <style>
             :host {
@@ -23,19 +27,11 @@ function notesDetails({ dataNote }: Props) {
                 font-size: 18px;
                 border-bottom: 1px solid var(--divider-color);
             }
-
-            .metadata {
-                color: var(--secondary-text-color);
-                font-size: 12px;
-                margin-bottom: 16px;
-            }
         </style>
 
-        <h2>${dataNote.title}</h2>
-        <div class="metadata">
-            Modified: ${timeAgo(dataNote.modified.getTime())}
-        </div>
-        <notes-markdown .value="${dataNote.body}"></notes-markdown>
+        <h2>${title}</h2>
+        <notes-metadata .dataNote="${dataNote}"></notes-metadata>
+        <notes-markdown .value="${body}"></notes-markdown>
     `;
 }
 
