@@ -106,7 +106,7 @@ async function doSyncAll() {
             } else if (note.deleted) {
                 // local delete --> delete remote
                 actions.push({ type: "delete-remote", note });
-            } else if (note.body !== note.lastSync?.sha) {
+            } else if (note.body !== note.lastSync?.body) {
                 // local change only --> update remote
                 actions.push({ type: "update-remote", note });
             }
