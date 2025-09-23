@@ -19,6 +19,7 @@
   "scripts": {
     "start": "vite",
     "build": "tsc && vite build",
-    "format": "prettier --write \"*.{js,md}\" \"src/**/*.{js,ts,md}\""
+    "format": "prettier --write \"*.{js,md}\" \"src/**/*.{js,ts,md}\"",
+    "dependencies": "node ./build/fix-reconcile-text-for-workers.mjs"
   }
 }

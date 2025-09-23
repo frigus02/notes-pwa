@@ -74,6 +74,7 @@ export class Router extends EventTarget {
 const instance = new Router({
     list: "/",
     note: "/note/:noteId",
+    edit: "/note/:noteId/edit",
     settings: "/settings",
 });
 
