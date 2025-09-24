@@ -4,6 +4,7 @@ import { Toolbar } from "./toolbar.js";
 import { useLocation } from "preact-iso";
 import { NotesList } from "./notes-list.js";
 import { useQuery } from "./utils/use-query.js";
+import { useSettingsDialog, SettingsDialog } from "./settings-dialog.js";
 
 export function ListPage() {
     const notes = useQuery(() => storage.getNotes(), []);
@@ -22,9 +23,7 @@ export function ListPage() {
         location.route(`/view/${note.path}`);
     };
 
-    const openSettings = () => {
-        location.route("/settings");
-    };
+    const [settingsDialogProps, openSettings] = useSettingsDialog();
 
     return (
         <>
@@ -32,6 +31,7 @@ export function ListPage() {
                 <button onClick={syncNotes}>Sync</button>
                 <button onClick={createNote}>New note</button>
                 <button onClick={openSettings}>Settings</button>
+                <SettingsDialog {...settingsDialogProps} />
             </Toolbar>
             <NotesList notes={notes} />
         </>
