@@ -1,3 +1,4 @@
+import preact from "@preact/preset-vite";
 import { serviceWorkerPlugin } from "./build/service-worker-plugin";
 
 /** @type {import('vite').UserConfig} */
@@ -7,5 +8,8 @@ export default {
         outDir: "../dist",
         emptyOutDir: true,
     },
-    plugins: [serviceWorkerPlugin({ src: "src/sw.js", out: "sw.js" })],
+    plugins: [
+        preact(),
+        serviceWorkerPlugin({ src: "src/sw.js", out: "sw.js" }),
+    ],
 };

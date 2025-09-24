@@ -1,17 +1,14 @@
 {
-  "name": "notes",
-  "version": "1.0.0",
-  "description": "A notes PWA",
-  "author": "Jan Kühle <jkuehle90@gmail.com>",
-  "license": "MIT",
   "private": true,
   "dependencies": {
-    "function-web-components": "0.0.6",
-    "lit-html": "1.1.0",
+    "@preact/signals": "^2.3.1",
     "marked": "16.3.0",
+    "preact": "10.26.9",
+    "preact-iso": "^2.10.0",
     "reconcile-text": "0.5.0"
   },
   "devDependencies": {
+    "@preact/preset-vite": "^2.10.2",
     "prettier": "3.6.2",
     "typescript": "5.9.2",
     "vite": "7.1.6"
@@ -19,7 +16,7 @@
   "scripts": {
     "start": "vite",
     "build": "tsc && vite build",
-    "format": "prettier --write \"*.{js,md}\" \"src/**/*.{js,ts,md}\"",
+    "format": "prettier --write \"*.{js,md}\" \"src/**/*.{css,js,ts,md}\"",
     "dependencies": "node ./build/fix-reconcile-text-for-workers.mjs"
   }
 }

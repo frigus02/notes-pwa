@@ -1,6 +1,7 @@
 import type { Action } from "../../worker/index.js";
 import { newId } from "../../shared/id.js";
 import type { Note } from "../../shared/storage.js";
+import { computed, signal } from "@preact/signals";
 
 class WorkerRequestManager {
     private _requests: Record<
@@ -48,20 +49,17 @@ interface SyncSucess {
     date: Date;
 }
 type SyncResult = SyncError | SyncSucess;
+type SyncState = "idle" | "syncing";
+
 class Sync extends EventTarget {
-    private _state: "idle" | "syncing" = "idle";
-    private _lastResult: SyncResult | undefined = undefined;
+    private readonly _state = signal<SyncState>("idle");
+    private readonly _lastResult = signal<SyncResult | undefined>(undefined);
 
-    get state() {
-        return this._state;
-    }
-
-    get lastResult() {
-        return this._lastResult;
-    }
+    readonly state = computed(() => this._state.value);
+    readonly lastResult = computed(() => this._lastResult.value);
 
     all(): void {
-        if (this._state === "syncing") {
+        if (this.state.value === "syncing") {
             return;
         }
 
@@ -70,7 +68,7 @@ class Sync extends EventTarget {
     }
 
     one(note: Note, oldNote: Note | undefined): void {
-        if (this._state === "syncing") {
+        if (this.state.value === "syncing") {
             return;
         }
 
@@ -80,15 +78,15 @@ class Sync extends EventTarget {
 
     private async start(type: "syncAll" | "syncOne", ...args: any[]) {
         try {
-            this._state = "syncing";
+            this._state.value = "syncing";
             this.dispatchEvent(new Event("sync-start"));
             await instance.request(type, ...args);
-            this._lastResult = { type: "success", date: new Date() };
+            this._lastResult.value = { type: "success", date: new Date() };
         } catch (e) {
             const error = e instanceof Error ? e : new Error("error");
-            this._lastResult = { type: "error", date: new Date(), error };
+            this._lastResult.value = { type: "error", date: new Date(), error };
         } finally {
-            this._state = "idle";
+            this._state.value = "idle";
             this.dispatchEvent(new Event("sync-end"));
         }
     }

@@ -2,12 +2,14 @@
     "compilerOptions": {
         "rootDir": "./src",
 
+        "target": "esnext",
         "module": "esnext",
         "moduleDetection": "force",
         "moduleResolution": "bundler",
         "esModuleInterop": true,
 
-        "target": "esnext",
+        "jsx": "react-jsx",
+        "jsxImportSource": "preact",
 
         "noEmit": true,
         "allowImportingTsExtensions": true,
@@ -25,5 +27,6 @@
         "verbatimModuleSyntax": true,
         "noUncheckedSideEffectImports": true,
         "skipLibCheck": true
-    }
+    },
+    "include": ["node_modules/vite/client.d.ts", "**/*"]
 }
