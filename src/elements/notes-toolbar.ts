@@ -16,22 +16,30 @@ function notesToolbar() {
                 color: var(--primary-text-color-on-dark);
                 height: 56px;
                 line-height: 24px;
-                padding: 16px;
+                padding: 0 16px;
                 position: fixed;
                 top: 0;
                 width: 100%;
                 display: flex;
                 justify-content: space-between;
+                align-items: center;
             }
 
             h1 {
                 margin: 0;
                 font-size: 20px;
             }
+
+            .sub {
+                font-size: small;
+            }
         </style>
 
         <header>
-            <h1><slot></slot></h1>
+            <div>
+                <h1><slot></slot></h1>
+                <div class="sub"><slot name="sub"></slot></div>
+            </div>
             <div><slot name="actions"></slot></div>
         </header>
     `;

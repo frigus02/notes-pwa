@@ -29,6 +29,9 @@ function notesPageNote({ dataState }: Props) {
         return html`
             <notes-toolbar>
                 ${noteTitle}
+                ${note.path !== noteTitle
+                    ? html`<span slot="sub">${note.path}</span>`
+                    : null}
                 <button slot="actions" @click="${editNote}">Edit</button>
                 <button slot="actions" @click="${deleteNote}">Delete</button>
             </notes-toolbar>

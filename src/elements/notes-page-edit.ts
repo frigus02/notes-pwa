@@ -33,6 +33,9 @@ function notesPageEdit({ dataState }: Props) {
             <form @submit="${onSubmit}">
                 <notes-toolbar>
                     ${noteTitle}
+                    ${note.path !== noteTitle
+                        ? html`<span slot="sub">${note.path}</span>`
+                        : null}
                     <button slot="actions" @click="${cancel}">Cancel</button>
                     <button slot="actions" type="submit">Save</button>
                 </notes-toolbar>
