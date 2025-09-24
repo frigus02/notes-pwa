@@ -92,7 +92,7 @@ async function doSyncAll() {
     for (const blob of blobs) {
         const note = notes.find((note) => note.path === blob.path);
         if (note) {
-            seen.add(note.id);
+            seen.add(note.path);
             if (blob.sha !== note.lastSync?.sha) {
                 const body = await getBlob(config, blob.sha);
                 if (
@@ -125,7 +125,7 @@ async function doSyncAll() {
     }
 
     for (const note of notes) {
-        if (seen.has(note.id)) continue;
+        if (seen.has(note.path)) continue;
         if (note.deleted) continue;
         if (note.body !== note.lastSync?.body) {
             // create remote
@@ -167,7 +167,7 @@ async function doSyncAll() {
                 await storage.updateNote(action.note);
                 break;
             case "delete-local":
-                await storage.deleteNote(action.note.id, true);
+                await storage.deleteNote(action.note.path, true);
                 break;
             case "create-remote":
             case "update-remote":
@@ -216,7 +216,7 @@ async function doSyncAll() {
                     await storage.updateNote(action.note);
                     break;
                 case "delete-remote":
-                    await storage.deleteNote(action.note.id, true);
+                    await storage.deleteNote(action.note.path, true);
                     break;
             }
         }
@@ -226,7 +226,7 @@ async function doSyncAll() {
 }
 
 async function doSyncOne(note: Note, oldNote: Note | undefined) {
-    if (oldNote && oldNote.id === note.id) {
+    if (oldNote && oldNote.path === note.path) {
         throw new Error("Old note must be a different note");
     }
     if (oldNote && note.deleted) {
@@ -248,7 +248,7 @@ async function doSyncOne(note: Note, oldNote: Note | undefined) {
     let newHead: RepoHead;
     if (note.deleted) {
         if (!note.lastSync) {
-            await storage.deleteNote(note.id, true);
+            await storage.deleteNote(note.path, true);
             return;
         }
         const commit: CreateCommitRequest = {
@@ -259,7 +259,7 @@ async function doSyncOne(note: Note, oldNote: Note | undefined) {
             message: `Delete ${note.path}`,
         };
         newHead = await createCommit(commit);
-        await storage.deleteNote(note.id, true);
+        await storage.deleteNote(note.path, true);
     } else {
         const commit: CreateCommitSingleAdditionRequest = {
             pat: settings.gitHubPat,
@@ -278,7 +278,7 @@ async function doSyncOne(note: Note, oldNote: Note | undefined) {
         };
         await storage.updateNote(note);
         if (oldNote) {
-            await storage.deleteNote(oldNote.id, true);
+            await storage.deleteNote(oldNote.path, true);
         }
     }
 

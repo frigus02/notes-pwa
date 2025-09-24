@@ -19,7 +19,7 @@ export function ListPage() {
 
     const createNote = async () => {
         const note = await storage.createNote();
-        location.route(`/note/${note.id}`);
+        location.route(`/view/${note.path}`);
     };
 
     const openSettings = () => {

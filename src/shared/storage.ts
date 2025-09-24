@@ -1,7 +1,4 @@
-import { newId } from "./id.js";
-
 export interface Note {
-    id: string;
     path: string;
     body: string;
     modified: Date;
@@ -46,10 +43,9 @@ class Storage extends EventTarget {
                 const db = request.result;
 
                 const objectStore = db.createObjectStore("notes", {
-                    keyPath: "id",
+                    keyPath: "path",
                 });
                 objectStore.createIndex("modified", "modified");
-                objectStore.createIndex("path", "path", { unique: true });
                 objectStore.transaction.oncomplete = () => {
                     const notesObjectStore = db
                         .transaction("notes", "readwrite")
@@ -57,7 +53,6 @@ class Storage extends EventTarget {
                     NOTES.forEach((note) => {
                         const newNote: Note = {
                             ...note,
-                            id: newId(),
                             modified: new Date(),
                             deleted: false,
                             lastSync: undefined,
@@ -104,7 +99,6 @@ class Storage extends EventTarget {
             deleted: false,
             lastSync: undefined,
             ...params,
-            id: newId(),
             modified: new Date(),
         };
         return this._transaction(["notes"], "readwrite", (objectStores) => {
@@ -131,9 +125,9 @@ class Storage extends EventTarget {
         );
     }
 
-    getNote(id: string): Promise<Note> {
+    getNote(path: string): Promise<Note> {
         return this._transaction(["notes"], "readonly", (objectStores) => {
-            return Storage.toPromise(objectStores[0].get(id));
+            return Storage.toPromise(objectStores[0].get(path));
         });
     }
 

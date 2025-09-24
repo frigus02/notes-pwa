@@ -42,8 +42,8 @@ export function App() {
             <ErrorBoundary>
                 <Router>
                     <Route path="/" component={ListPage} />
-                    <Route path="/note/:id" component={NotePage} />
-                    <Route path="/note/:id/edit" component={EditPage} />
+                    <Route path="/view/:path+" component={NotePage} />
+                    <Route path="/edit/:path+" component={EditPage} />
                     <Route path="/settings" component={SettingsPage} />
                     <Route default component={NotFoundPage} />
                 </Router>

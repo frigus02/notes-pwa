@@ -9,8 +9,8 @@ export function NotesList({ notes }: Props) {
     return (
         <ul class="notes-list">
             {notes.map((note) => (
-                <li class="note-item" key={note.id}>
-                    <a href={`/note/${note.id}`}>
+                <li class="note-item" key={note.path}>
+                    <a href={`/view/${note.path}`}>
                         <div>
                             <h2>{splitNote(note)[0]}</h2>
                             {note.path !== splitNote(note)[0] ? (

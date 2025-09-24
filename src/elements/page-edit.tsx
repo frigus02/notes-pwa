@@ -8,14 +8,14 @@ import { useQuery } from "./utils/use-query.js";
 export function EditPage() {
     const { params } = useRoute();
     const location = useLocation();
-    const note = useQuery(() => storage.getNote(params["id"]), [params["id"]]);
+    const note = useQuery(() => storage.getNote(params["path"]), [params["path"]]);
 
     if (!note) {
         return <Toolbar title="Note" />;
     }
 
     const cancel = () => {
-        location.route(`/note/${note.id}`);
+        location.route(`/view/${note.path}`);
     };
 
     const onSubmit = async (e: SubmitEvent) => {
@@ -25,7 +25,7 @@ export function EditPage() {
         const path = (data.get("path") as string | null) ?? "";
         let newNote: Note;
         if (path !== note.path) {
-            await storage.deleteNote(note.id);
+            await storage.deleteNote(note.path);
             newNote = await storage.createNote({
                 ...note,
                 body,
@@ -35,10 +35,10 @@ export function EditPage() {
             sync.one(newNote, note);
         } else {
             await storage.updateNote({ ...note, body });
-            newNote = await storage.getNote(note.id);
+            newNote = await storage.getNote(note.path);
             sync.one(newNote, undefined);
         }
-        location.route(`/note/${newNote.id}`);
+        location.route(`/view/${newNote.path}`);
     };
 
     const [title] = splitNote(note);

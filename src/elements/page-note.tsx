@@ -10,19 +10,19 @@ import { useQuery } from "./utils/use-query.js";
 export function NotePage() {
     const { params } = useRoute();
     const location = useLocation();
-    const note = useQuery(() => storage.getNote(params["id"]), [params["id"]]);
+    const note = useQuery(() => storage.getNote(params["path"]), [params["path"]]);
 
     if (!note) {
         return <Toolbar title="Note" />;
     }
 
     const editNote = () => {
-        location.route(`/note/${note.id}/edit`);
+        location.route(`/edit/${note.path}`);
     };
     const deleteNote = async () => {
         if (confirm("Delete note?")) {
-            await storage.deleteNote(note.id);
-            sync.one(await storage.getNote(note.id), undefined);
+            await storage.deleteNote(note.path);
+            sync.one(await storage.getNote(note.path), undefined);
             location.route("/");
         }
     };
