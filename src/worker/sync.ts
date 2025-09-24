@@ -225,7 +225,14 @@ async function doSyncAll() {
     await storage.saveSettings({ gitHubHead: head });
 }
 
-async function doSyncOne(note: Note) {
+async function doSyncOne(note: Note, oldNote: Note | undefined) {
+    if (oldNote && oldNote.id === note.id) {
+        throw new Error("Old note must be a different note");
+    }
+    if (oldNote && note.deleted) {
+        throw new Error("Cannot specify old note on deletion of note");
+    }
+
     const settings = await storage.loadSettings();
     if (
         !settings.gitHubPat ||
@@ -240,6 +247,10 @@ async function doSyncOne(note: Note) {
 
     let newHead: RepoHead;
     if (note.deleted) {
+        if (!note.lastSync) {
+            await storage.deleteNote(note.id, true);
+            return;
+        }
         const commit: CreateCommitRequest = {
             pat: settings.gitHubPat,
             head: settings.gitHubHead,
@@ -256,6 +267,9 @@ async function doSyncOne(note: Note) {
             addition: { path: note.path, content: note.body },
             message: `Update ${note.path}`,
         };
+        if (oldNote?.lastSync) {
+            commit.deletion = { path: oldNote.path };
+        }
         const result = await createCommitSingleAddition(commit);
         newHead = result.head;
         note.lastSync = {
@@ -263,6 +277,9 @@ async function doSyncOne(note: Note) {
             body: note.body,
         };
         await storage.updateNote(note);
+        if (oldNote) {
+            await storage.deleteNote(oldNote.id, true);
+        }
     }
 
     await storage.saveSettings({ gitHubHead: newHead });
@@ -283,14 +300,14 @@ export async function syncAll() {
     }
 }
 
-export async function syncOne(note: Note) {
+export async function syncOne(note: Note, oldNote: Note | undefined) {
     if (isSyncing) {
         throw new Error("Sync already in progress");
     }
 
     isSyncing = true;
     try {
-        await doSyncOne(note);
+        await doSyncOne(note, oldNote);
     } finally {
         isSyncing = false;
     }

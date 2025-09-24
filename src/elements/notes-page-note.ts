@@ -19,7 +19,7 @@ function notesPageNote({ dataState }: Props) {
     const deleteNote = async () => {
         if (confirm("Delete note?")) {
             await storage.deleteNote(dataState.noteId);
-            sync.one(await storage.getNote(dataState.noteId));
+            sync.one(await storage.getNote(dataState.noteId), undefined);
             router.navigate("/");
         }
     };

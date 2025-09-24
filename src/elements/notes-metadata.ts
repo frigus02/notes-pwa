@@ -2,7 +2,7 @@ import { makeWebComponent } from "function-web-components";
 import { html, render } from "./notes-base-element.js";
 import "./notes-markdown.js";
 
-import { timeAgo } from "../shared/format.js";
+import { syncState, timeAgo } from "../shared/format.js";
 
 interface Props {
     [key: string]: any;
@@ -10,8 +10,6 @@ interface Props {
 
 function notesMetadata({ dataNote }: Props) {
     if (!dataNote) return;
-    const synced =
-        dataNote.lastSync?.body === dataNote.body ? "synced" : "modified";
     return html`
         <style>
             :host {
@@ -44,7 +42,7 @@ function notesMetadata({ dataNote }: Props) {
             <dt>Modified:</dt>
             <dd>${timeAgo(dataNote.modified.getTime())}</dd>
             <dt>Sync:</dt>
-            <dd>${synced}</dd>
+            <dd>${syncState(dataNote)}</dd>
         </dl>
     `;
 }

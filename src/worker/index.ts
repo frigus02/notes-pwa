@@ -17,7 +17,7 @@ export type Action = keyof typeof actions;
 interface MessageData {
     id: string;
     action: Action;
-    args: [any];
+    args: [any, any];
 }
 
 addEventListener("message", async function (e) {

@@ -36,3 +36,10 @@ export function shortDate(date: Date) {
         timeStyle: "short",
     }).format(date);
 }
+
+export function syncState(note: Note) {
+    if (note.body === note.lastSync?.body) {
+        return "synced";
+    }
+    return "modified";
+}

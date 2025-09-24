@@ -1,7 +1,7 @@
 import { makeWebComponent } from "function-web-components";
 import { html, render, repeat } from "./notes-base-element.js";
 
-import { splitNote, timeAgo } from "../shared/format.js";
+import { splitNote, syncState, timeAgo } from "../shared/format.js";
 import { type Note } from "../shared/storage.js";
 
 interface Props {
@@ -55,6 +55,10 @@ function notesList({ dataNotes }: Props) {
                 color: var(--secondary-text-color);
                 font-size: small;
             }
+
+            .note-item .metadata {
+                text-align: right;
+            }
         </style>
 
         <ul class="list">
@@ -74,11 +78,7 @@ function notesList({ dataNotes }: Props) {
                             </div>
                             <div class="metadata">
                                 <div>${timeAgo(note.modified.getTime())}</div>
-                                <div>
-                                    ${note.lastSync?.body === note.body
-                                        ? "synced"
-                                        : "modified"}
-                                </div>
+                                <div>${syncState(note)}</div>
                             </div>
                         </a>
                     </li>

@@ -69,13 +69,13 @@ class Sync extends EventTarget {
         this.start("syncAll");
     }
 
-    one(note: Note): void {
+    one(note: Note, oldNote: Note | undefined): void {
         if (this._state === "syncing") {
             return;
         }
 
         // don't await
-        this.start("syncOne", note);
+        this.start("syncOne", note, oldNote);
     }
 
     private async start(type: "syncAll" | "syncOne", ...args: any[]) {

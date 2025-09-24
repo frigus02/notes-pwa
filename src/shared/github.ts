@@ -169,6 +169,7 @@ export interface CreateCommitSingleAdditionRequest {
     head: RepoHead;
     message: string;
     addition: { path: string; content: string };
+    deletion?: { path: string };
 }
 
 export interface CreateCommitSingleAdditionReponse {
@@ -181,11 +182,12 @@ export async function createCommitSingleAddition({
     head,
     message,
     addition,
+    deletion,
 }: CreateCommitSingleAdditionRequest): Promise<CreateCommitSingleAdditionReponse> {
     const encoder = new TextEncoder();
     const result = await ghGraphQL({
         pat,
-        query: `mutation($branchId: ID, $headOid: GitObjectID!, $path: String!, $contents: Base64String!, $message: String!) {
+        query: `mutation($branchId: ID, $headOid: GitObjectID!, $path: String!, $contents: Base64String!, $deletions: [FileDeletion!], $message: String!) {
           createCommitOnBranch(input: {
             branch: { id: $branchId },
             expectedHeadOid: $headOid,
@@ -195,7 +197,8 @@ export async function createCommitSingleAddition({
                   path: $path,
                   contents: $contents,
                 }
-              ]
+              ],
+              deletions: $deletions
             },
             message: {
               headline: $message
@@ -214,6 +217,7 @@ export async function createCommitSingleAddition({
             headOid: head.oid,
             path: addition.path,
             contents: encoder.encode(addition.content).toBase64(),
+            deletions: deletion ? [{ path: deletion.path }] : undefined,
             message,
         },
     });

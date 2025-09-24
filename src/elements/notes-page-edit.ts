@@ -3,7 +3,7 @@ import { html, render, until } from "./notes-base-element.js";
 import "./notes-toolbar.js";
 import router from "./utils/router.js";
 
-import storage from "../shared/storage.js";
+import storage, { type Note } from "../shared/storage.js";
 import { splitNote } from "../shared/format.js";
 import { sync } from "./utils/worker.js";
 
@@ -20,12 +20,24 @@ function notesPageEdit({ dataState }: Props) {
         const onSubmit = async (e: SubmitEvent) => {
             e.preventDefault();
             const data = new FormData(e.target as HTMLFormElement);
-            await storage.updateNote({
-                ...note,
-                body: (data.get("body") as string | null) ?? "",
-            });
-            sync.one(await storage.getNote(note.id));
-            router.navigate(`/note/${dataState.noteId}`);
+            const body = (data.get("body") as string | null) ?? "";
+            const path = (data.get("path") as string | null) ?? "";
+            let newNote: Note;
+            if (path !== note.path) {
+                await storage.deleteNote(note.id);
+                newNote = await storage.createNote({
+                    ...note,
+                    body,
+                    path,
+                    lastSync: undefined,
+                });
+                sync.one(newNote, note);
+            } else {
+                await storage.updateNote({ ...note, body });
+                newNote = await storage.getNote(note.id);
+                sync.one(newNote, undefined);
+            }
+            router.navigate(`/note/${newNote.id}`);
         };
 
         const noteTitle = splitNote(note)[0];
@@ -39,11 +51,17 @@ function notesPageEdit({ dataState }: Props) {
                     <button slot="actions" @click="${cancel}">Cancel</button>
                     <button slot="actions" type="submit">Save</button>
                 </notes-toolbar>
-                <textarea
-                    aria-label="Note content"
-                    name="body"
-                    .value="${note.body}"
-                ></textarea>
+                <div class="fields">
+                    <label>
+                        Path:
+                        <input name="path" .value="${note.path}" />
+                    </label>
+                    <textarea
+                        aria-label="Note content"
+                        name="body"
+                        .value="${note.body}"
+                    ></textarea>
+                </div>
             </form>
         `;
     });
@@ -64,8 +82,23 @@ function notesPageEdit({ dataState }: Props) {
                 position: fixed;
             }
 
-            textarea {
+            .fields {
                 margin-top: 59px;
+                flex: 1;
+                display: flex;
+                flex-direction: column;
+            }
+
+            label {
+                display: flex;
+                align-items: center;
+            }
+
+            input {
+                flex: 1;
+            }
+
+            textarea {
                 flex: 1;
                 resize: none;
                 box-sizing: border-box;
