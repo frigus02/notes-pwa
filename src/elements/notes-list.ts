@@ -44,17 +44,16 @@ function notesList({ dataNotes }: Props) {
                 font-weight: normal;
             }
 
-            .note-item p {
-                margin: 0;
-                color: var(--secondary-text-color);
+            .note-item a {
                 display: flex;
-                white-space: nowrap;
                 justify-content: space-between;
+                align-items: center;
             }
 
-            .note-item p .summary {
-                overflow: hidden;
-                text-overflow: ellipsis;
+            .note-item .path,
+            .note-item .metadata {
+                color: var(--secondary-text-color);
+                font-size: small;
             }
         </style>
 
@@ -65,13 +64,22 @@ function notesList({ dataNotes }: Props) {
                 (note: Note) => html`
                     <li class="note-item">
                         <a href="/note/${note.id}">
-                            <h2>${splitNote(note)[0]}</h2>
-                            <p>
-                                <span class="summary"
-                                    >${splitNote(note)[1]}</span
-                                >
-                                <span>${timeAgo(note.modified.getTime())}</span>
-                            </p>
+                            <div>
+                                <h2>${splitNote(note)[0]}</h2>
+                                ${note.path !== splitNote(note)[0]
+                                    ? html`<span class="path"
+                                          >${note.path}</span
+                                      >`
+                                    : null}
+                            </div>
+                            <div class="metadata">
+                                <div>${timeAgo(note.modified.getTime())}</div>
+                                <div>
+                                    ${note.lastSync?.body === note.body
+                                        ? "synced"
+                                        : "modified"}
+                                </div>
+                            </div>
                         </a>
                     </li>
                 `,
