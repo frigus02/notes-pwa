@@ -1,13 +1,8 @@
-import { marked } from "marked";
+import { render } from "./markdown.js";
 import { syncAll, syncOne } from "./sync.js";
 
-marked.setOptions({
-    gfm: true,
-    breaks: true,
-});
-
 const actions = {
-    markdownToHtml: marked,
+    markdownToHtml: render,
     syncAll,
     syncOne,
 };
