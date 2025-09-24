@@ -1,15 +1,10 @@
-import { useEffect, useState } from "preact/hooks";
-import storage, { type Settings } from "../shared/storage.js";
+import storage from "../shared/storage.js";
 import { Toolbar } from "./toolbar.js";
 import { useLocation } from "preact-iso";
+import { useQuery } from "./utils/use-query.js";
 
 export function SettingsPage() {
-    const [settings, setSettings] = useState<Partial<Settings>>();
-    useEffect(() => {
-        storage.loadSettings().then((settings) => {
-            setSettings(settings);
-        });
-    }, []);
+    const settings = useQuery(() => storage.loadSettings(), []);
     const location = useLocation();
 
     if (!settings) {

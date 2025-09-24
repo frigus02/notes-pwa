@@ -2,18 +2,13 @@ import storage, { type Note } from "../shared/storage.js";
 import { splitNote } from "../shared/format.js";
 import { sync } from "./utils/worker.js";
 import { Toolbar } from "./toolbar.js";
-import { useEffect, useState } from "preact/hooks";
 import { useLocation, useRoute } from "preact-iso";
+import { useQuery } from "./utils/use-query.js";
 
 export function EditPage() {
     const { params } = useRoute();
     const location = useLocation();
-    const [note, setNote] = useState<Note>();
-    useEffect(() => {
-        storage.getNote(params["id"]).then((note) => {
-            setNote(note);
-        });
-    }, [params]);
+    const note = useQuery(() => storage.getNote(params["id"]), [params["id"]]);
 
     if (!note) {
         return <Toolbar title="Note" />;

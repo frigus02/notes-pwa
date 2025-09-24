@@ -1,17 +1,12 @@
 import { sync } from "./utils/worker.js";
-import storage, { type Note } from "../shared/storage.js";
-import { useEffect, useState } from "preact/hooks";
+import storage from "../shared/storage.js";
 import { Toolbar } from "./toolbar.js";
 import { useLocation } from "preact-iso";
 import { NotesList } from "./notes-list.js";
+import { useQuery } from "./utils/use-query.js";
 
 export function ListPage() {
-    const [notes, setNotes] = useState<Note[]>();
-    useEffect(() => {
-        storage.getNotes().then((notes) => {
-            setNotes(notes);
-        });
-    }, []);
+    const notes = useQuery(() => storage.getNotes(), []);
     const location = useLocation();
 
     if (notes === undefined) {
