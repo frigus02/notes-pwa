@@ -1,5 +1,5 @@
 import { computed, signal, effect } from "@preact/signals";
-import storage from "../../shared/storage";
+import storage, { type Note } from "../../shared/storage";
 import { sync } from "./sync.js";
 import { splitNote, syncState } from "../../shared/format.js";
 
@@ -14,12 +14,24 @@ export interface UiNote {
 const _notes = signal<UiNote[]>([]);
 export const notes = computed(() => _notes.value);
 
+function getTitle(note: Note) {
+    const fromBody = splitNote(note.body)[0];
+    if (fromBody) {
+        return fromBody;
+    }
+
+    return note.path.substring(
+        note.path.lastIndexOf("/") + 1,
+        note.path.lastIndexOf("."),
+    );
+}
+
 effect(() => {
     storage.modified.value;
     sync.lastResult.value;
     storage.getNotes().then((notes) => {
         _notes.value = notes.map<UiNote>((note) => ({
-            title: splitNote(note.body)[0] || note.path,
+            title: getTitle(note),
             path: note.path,
             body: note.body,
             modified: note.modified,

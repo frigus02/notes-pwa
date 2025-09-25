@@ -36,10 +36,7 @@ export function NotePage() {
 
     return (
         <div class="note-details">
-            <Toolbar
-                title={note.title}
-                subTitle={note.title === note.path ? "" : note.path}
-            >
+            <Toolbar title={note.title} subTitle={note.path}>
                 <DefaultActions />
                 <button onClick={editNote}>Edit</button>
                 <button onClick={deleteNote}>Delete</button>

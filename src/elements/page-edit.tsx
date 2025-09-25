@@ -43,10 +43,7 @@ export function EditPage() {
 
     return (
         <form class="note-edit" onSubmit={onSubmit}>
-            <Toolbar
-                title={note.title}
-                subTitle={note.title === note.path ? "" : note.path}
-            >
+            <Toolbar title={note.title} subTitle={note.path}>
                 <button onClick={cancel}>Cancel</button>
                 <button type="submit">Save</button>
             </Toolbar>

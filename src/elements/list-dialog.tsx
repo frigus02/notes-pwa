@@ -16,9 +16,7 @@ export function ListDialogContent() {
                         <a href={`/view/${note.path}`}>
                             <div>
                                 <h2>{note.title}</h2>
-                                {note.path !== note.title ? (
-                                    <span class="path">{note.path}</span>
-                                ) : null}
+                                <span class="path">{note.path}</span>
                             </div>
                             <div class="metadata">
                                 <div>{timeAgo(note.modified.getTime())}</div>
