@@ -1,3 +1,4 @@
+import type { JSX } from "preact/jsx-runtime";
 import storage, { type Note } from "../shared/storage.js";
 import { sync } from "./utils/sync.js";
 import { Toolbar } from "./toolbar.js";
@@ -9,9 +10,9 @@ export interface Props {
 }
 
 export function EditNote({ note, onView }: Props) {
-    const onSubmit = async (e: SubmitEvent) => {
+    const onSubmit = async (e: JSX.TargetedSubmitEvent<HTMLFormElement>) => {
         e.preventDefault();
-        const data = new FormData(e.target as HTMLFormElement);
+        const data = new FormData(e.currentTarget);
         const body = (data.get("body") as string | null) ?? "";
         const path = (data.get("path") as string | null) ?? "";
         let newNote: Note;

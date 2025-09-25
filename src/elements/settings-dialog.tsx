@@ -1,3 +1,4 @@
+import type { JSX } from "preact/jsx-runtime";
 import storage from "../shared/storage.js";
 import { useQuery } from "./utils/use-query.js";
 
@@ -7,8 +8,8 @@ export function SettingsDialogContent() {
         return <div>Loading...</div>;
     }
 
-    async function onSubmit(e: Event) {
-        const data = new FormData(e.target as HTMLFormElement);
+    async function onSubmit(e: JSX.TargetedSubmitEvent<HTMLFormElement>) {
+        const data = new FormData(e.currentTarget);
         const settings = {
             gitHubPat: (data.get("gh-pat") as string | null)?.trim() ?? "",
             gitHubRepoOwner:
