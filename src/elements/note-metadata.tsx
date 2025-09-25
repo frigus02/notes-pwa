@@ -1,8 +1,8 @@
-import { syncState, timeAgo } from "../shared/format.js";
-import type { Note } from "../shared/storage.js";
+import { timeAgo } from "../shared/format.js";
+import type { UiNote } from "./utils/notes.js";
 
 interface Props {
-    note: Note;
+    note: UiNote;
 }
 
 export function NoteMetadata({ note }: Props) {
@@ -11,7 +11,7 @@ export function NoteMetadata({ note }: Props) {
             <dt>Modified:</dt>
             <dd>{timeAgo(note.modified.getTime())}</dd>
             <dt>Sync:</dt>
-            <dd>{syncState(note)}</dd>
+            <dd>{note.syncState}</dd>
         </dl>
     );
 }

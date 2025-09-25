@@ -5,18 +5,16 @@ import { useLocation, useRoute } from "preact-iso";
 import { Toolbar } from "./toolbar.js";
 import { NoteMetadata } from "./note-metadata.js";
 import { NoteMarkdown } from "./note-markdown.js";
-import { useQuery } from "./utils/use-query.js";
+import { notes } from "./utils/notes.js";
+import { NotFoundPage } from "./page-404.js";
 
 export function NotePage() {
     const { params } = useRoute();
     const location = useLocation();
-    const note = useQuery(
-        () => storage.getNote(params["path"]),
-        [params["path"]],
-    );
+    const note = notes.value.find((note) => note.path === params["path"]);
 
     if (!note) {
-        return <Toolbar title="Note" />;
+        return <NotFoundPage />;
     }
 
     const editNote = () => {
@@ -30,13 +28,13 @@ export function NotePage() {
         }
     };
 
-    const [title, body] = splitNote(note);
+    const [_title, body] = splitNote(note.body);
 
     return (
         <div class="note-details">
             <Toolbar
-                title={title}
-                subTitle={note.path === title ? "" : note.path}
+                title={note.title}
+                subTitle={note.title === note.path ? "" : note.path}
             >
                 <button onClick={editNote}>Edit</button>
                 <button onClick={deleteNote}>Delete</button>

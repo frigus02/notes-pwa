@@ -1,17 +1,17 @@
 import storage, { type Note } from "../shared/storage.js";
-import { splitNote } from "../shared/format.js";
 import { sync } from "./utils/sync.js";
 import { Toolbar } from "./toolbar.js";
 import { useLocation, useRoute } from "preact-iso";
-import { useQuery } from "./utils/use-query.js";
+import { notes } from "./utils/notes.js";
+import { NotFoundPage } from "./page-404.js";
 
 export function EditPage() {
     const { params } = useRoute();
     const location = useLocation();
-    const note = useQuery(() => storage.getNote(params["path"]), [params["path"]]);
+    const note = notes.value.find((note) => note.path === params["path"]);
 
     if (!note) {
-        return <Toolbar title="Note" />;
+        return <NotFoundPage />;
     }
 
     const cancel = () => {
@@ -27,27 +27,25 @@ export function EditPage() {
         if (path !== note.path) {
             await storage.deleteNote(note.path);
             newNote = await storage.createNote({
-                ...note,
-                body,
                 path,
-                lastSync: undefined,
+                body,
             });
-            sync.one(newNote, note);
+            sync.one(newNote, await storage.getNote(note.path));
         } else {
-            await storage.updateNote({ ...note, body });
+            newNote = await storage.getNote(note.path);
+            newNote.body = body;
+            await storage.updateNote(newNote);
             newNote = await storage.getNote(note.path);
             sync.one(newNote, undefined);
         }
         location.route(`/view/${newNote.path}`);
     };
 
-    const [title] = splitNote(note);
-
     return (
         <form class="note-edit" onSubmit={onSubmit}>
             <Toolbar
-                title={title}
-                subTitle={note.path === title ? "" : note.path}
+                title={note.title}
+                subTitle={note.title === note.path ? "" : note.path}
             >
                 <button onClick={cancel}>Cancel</button>
                 <button type="submit">Save</button>

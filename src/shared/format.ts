@@ -5,18 +5,18 @@ export const MS_MINUTE = MS_SECOND * 60;
 export const MS_HOUR = MS_MINUTE * 60;
 export const MS_DAY = MS_HOUR * 24;
 
-export function splitNote(note: Note): [string, string] {
-    if (note.body.startsWith("# ")) {
-        const firstLineEnd = note.body.indexOf("\n");
+export function splitNote(body: string): [string, string] {
+    if (body.startsWith("# ")) {
+        const firstLineEnd = body.indexOf("\n");
         if (firstLineEnd === -1) {
-            return [note.body.substring(1).trim(), ""];
+            return [body.substring(1).trim(), ""];
         }
-        const title = note.body.substring(2, firstLineEnd).trim();
-        const body = note.body.substring(firstLineEnd + 1).trim();
-        return [title, body];
+        const title = body.substring(2, firstLineEnd).trim();
+        const newBody = body.substring(firstLineEnd + 1).trim();
+        return [title, newBody];
     }
 
-    return [note.path, note.body];
+    return ["", body];
 }
 
 export function timeAgo(date: number) {

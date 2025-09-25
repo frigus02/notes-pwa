@@ -1,3 +1,5 @@
+import { computed, signal } from "@preact/signals";
+
 export interface Note {
     path: string;
     body: string;
@@ -20,8 +22,11 @@ export interface Settings {
     gitHubHead: { id: string; oid: string };
 }
 
-class Storage extends EventTarget {
+class Storage {
     private _dbPromise?: Promise<IDBDatabase>;
+
+    private readonly _modified = signal<Date>();
+    readonly modified = computed(() => this._modified.value);
 
     static toPromise<T>(request: IDBRequest<T>): Promise<T> {
         return new Promise((resolve, reject) => {
@@ -32,6 +37,10 @@ class Storage extends EventTarget {
                 resolve(request.result);
             };
         });
+    }
+
+    private markModified() {
+        this._modified.value = new Date();
     }
 
     _openDatabase() {
@@ -92,7 +101,7 @@ class Storage extends EventTarget {
         });
     }
 
-    createNote(params: Partial<Note> = {}): Promise<Note> {
+    async createNote(params: Partial<Note> = {}): Promise<Note> {
         const note: Note = {
             path: "new.md",
             body: "# New note",
@@ -101,10 +110,11 @@ class Storage extends EventTarget {
             ...params,
             modified: new Date(),
         };
-        return this._transaction(["notes"], "readwrite", (objectStores) => {
+        await this._transaction(["notes"], "readwrite", (objectStores) => {
             objectStores[0].add(note);
-            return note;
         });
+        this.markModified();
+        return note;
     }
 
     getNotes(includeDeleted?: boolean): Promise<Note[]> {
@@ -131,22 +141,23 @@ class Storage extends EventTarget {
         });
     }
 
-    updateNote(note: Note): Promise<void> {
+    async updateNote(note: Note): Promise<void> {
         note.modified = new Date();
-        return this._transaction(["notes"], "readwrite", (objectStores) => {
+        await this._transaction(["notes"], "readwrite", (objectStores) => {
             objectStores[0].put(note);
         });
+        this.markModified();
     }
 
-    deleteNote(id: string, force?: boolean): Promise<void> {
-        return this._transaction(
+    async deleteNote(path: string, force?: boolean): Promise<void> {
+        await this._transaction(
             ["notes"],
             "readwrite",
             async (objectStores) => {
                 if (force) {
-                    objectStores[0].delete(id);
+                    objectStores[0].delete(path);
                 } else {
-                    objectStores[0].get(id).onsuccess = (e) => {
+                    objectStores[0].get(path).onsuccess = (e) => {
                         const note: Note = (e.target as IDBRequest).result;
                         note.deleted = true;
                         objectStores[0].put(note);
@@ -154,10 +165,11 @@ class Storage extends EventTarget {
                 }
             },
         );
+        this.markModified();
     }
 
-    saveSettings(settings: Partial<Settings>): Promise<void> {
-        return this._transaction(["settings"], "readwrite", (objectStores) => {
+    async saveSettings(settings: Partial<Settings>): Promise<void> {
+        await this._transaction(["settings"], "readwrite", (objectStores) => {
             for (const [name, value] of Object.entries(settings)) {
                 objectStores[0].put({
                     name,
@@ -165,6 +177,7 @@ class Storage extends EventTarget {
                 });
             }
         });
+        this.markModified();
     }
 
     loadSettings(): Promise<Partial<Settings>> {

@@ -2,17 +2,12 @@ import { sync } from "./utils/sync.js";
 import storage from "../shared/storage.js";
 import { Toolbar } from "./toolbar.js";
 import { useLocation } from "preact-iso";
-import { NotesList } from "./notes-list.js";
-import { useQuery } from "./utils/use-query.js";
 import { useSettingsDialog, SettingsDialog } from "./settings-dialog.js";
+import { notes } from "./utils/notes.js";
+import { timeAgo } from "../shared/format.js";
 
 export function ListPage() {
-    const notes = useQuery(() => storage.getNotes(), []);
     const location = useLocation();
-
-    if (notes === undefined) {
-        return <Toolbar title="Notes" />;
-    }
 
     const syncNotes = () => {
         sync.all();
@@ -33,7 +28,24 @@ export function ListPage() {
                 <button onClick={openSettings}>Settings</button>
                 <SettingsDialog {...settingsDialogProps} />
             </Toolbar>
-            <NotesList notes={notes} />
+            <ul class="notes-list">
+                {notes.value.map((note) => (
+                    <li class="note-item" key={note.path}>
+                        <a href={`/view/${note.path}`}>
+                            <div>
+                                <h2>{note.title}</h2>
+                                {note.path !== note.title ? (
+                                    <span class="path">{note.path}</span>
+                                ) : null}
+                            </div>
+                            <div class="metadata">
+                                <div>{timeAgo(note.modified.getTime())}</div>
+                                <div>{note.syncState}</div>
+                            </div>
+                        </a>
+                    </li>
+                ))}
+            </ul>
         </>
     );
 }
