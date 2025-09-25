@@ -1,19 +1,24 @@
 import { notes } from "./utils/notes.js";
 import { timeAgo } from "../shared/format.js";
+import { useRef } from "preact/hooks";
 
 export function ListDialogContent() {
+    const form = useRef<HTMLFormElement>(null);
+    const onClick = () => {
+        form.current?.submit();
+    };
     return (
         <div class="notes-list">
             <header>
                 <h1>Notes</h1>
-                <form method="dialog">
+                <form method="dialog" ref={form}>
                     <input type="submit" value="Close" />
                 </form>
             </header>
             <ul>
                 {notes.value.map((note) => (
                     <li class="note-item" key={note.path}>
-                        <a href={`#/${note.path}`}>
+                        <a href={`#/${note.path}`} onClick={onClick}>
                             <div>
                                 <h2>{note.title}</h2>
                                 <span class="path">{note.path}</span>
