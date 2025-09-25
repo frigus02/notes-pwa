@@ -22,7 +22,6 @@ const syncText = computed(() => {
     }
 });
 
-const ListPage = lazy(() => import("./page-list.js").then((m) => m.ListPage));
 const NotePage = lazy(() => import("./page-note.js").then((m) => m.NotePage));
 const EditPage = lazy(() => import("./page-edit.js").then((m) => m.EditPage));
 const NotFoundPage = lazy(() =>
@@ -38,7 +37,7 @@ export function App() {
         <LocationProvider>
             <ErrorBoundary>
                 <Router>
-                    <Route path="/" component={ListPage} />
+                    <Route path="/" component={NotePage} />
                     <Route path="/view/:path+" component={NotePage} />
                     <Route path="/edit/:path+" component={EditPage} />
                     <Route default component={NotFoundPage} />

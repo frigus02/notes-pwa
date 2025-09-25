@@ -68,7 +68,12 @@
     font-size: small;
 }
 
-.notes-list {
+.notes-list h1 {
+    margin: 0 0 8px;
+    font-size: 20px;
+}
+
+.notes-list ul {
     margin: 0;
     padding: 0;
     list-style-type: none;

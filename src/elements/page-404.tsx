@@ -5,7 +5,7 @@ export function NotFoundPage() {
         <>
             <Toolbar title="Not found" />
             <p class="not-found">
-                Whooops. This page does not exist. I suggest you
+                Whooops. This page does not exist. I suggest you{" "}
                 <a href="/">start again</a>.
             </p>
         </>

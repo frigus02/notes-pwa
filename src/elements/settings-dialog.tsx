@@ -1,34 +1,7 @@
-import { useState } from "preact/hooks";
 import storage from "../shared/storage.js";
 import { useQuery } from "./utils/use-query.js";
-import type { RefCallback } from "preact";
 
-interface Props {
-    visible: boolean;
-    dialogRef: RefCallback<HTMLDialogElement>;
-}
-
-export function useSettingsDialog() {
-    const [visible, setVisible] = useState(false);
-    const dialogRef: RefCallback<HTMLDialogElement> = (dialog) => {
-        if (!dialog) return;
-        dialog.addEventListener("close", () => setVisible(false));
-        dialog.showModal();
-    };
-    const props: Props = { visible, dialogRef };
-    const open = () => void setVisible(true);
-    return [props, open] as const;
-}
-
-export function SettingsDialog({ visible, dialogRef }: Props) {
-    return visible ? (
-        <dialog ref={dialogRef}>
-            <SettingsDialogContent />
-        </dialog>
-    ) : null;
-}
-
-function SettingsDialogContent() {
+export function SettingsDialogContent() {
     const settings = useQuery(() => storage.loadSettings(), []);
     if (!settings) {
         return <div>Loading...</div>;

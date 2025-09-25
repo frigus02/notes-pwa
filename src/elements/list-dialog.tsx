@@ -1,33 +1,10 @@
-import { sync } from "./utils/sync.js";
-import storage from "../shared/storage.js";
-import { Toolbar } from "./toolbar.js";
-import { useLocation } from "preact-iso";
-import { useSettingsDialog, SettingsDialog } from "./settings-dialog.js";
 import { notes } from "./utils/notes.js";
 import { timeAgo } from "../shared/format.js";
 
-export function ListPage() {
-    const location = useLocation();
-
-    const syncNotes = () => {
-        sync.all();
-    };
-
-    const createNote = async () => {
-        const note = await storage.createNote();
-        location.route(`/view/${note.path}`);
-    };
-
-    const [settingsDialogProps, openSettings] = useSettingsDialog();
-
+export function ListDialogContent() {
     return (
-        <>
-            <Toolbar title="Notes">
-                <button onClick={syncNotes}>Sync</button>
-                <button onClick={createNote}>New note</button>
-                <button onClick={openSettings}>Settings</button>
-                <SettingsDialog {...settingsDialogProps} />
-            </Toolbar>
+        <div class="notes-list">
+            <h1>Notes</h1>
             <ul class="notes-list">
                 {notes.value.map((note) => (
                     <li class="note-item" key={note.path}>
@@ -46,6 +23,6 @@ export function ListPage() {
                     </li>
                 ))}
             </ul>
-        </>
+        </div>
     );
 }
