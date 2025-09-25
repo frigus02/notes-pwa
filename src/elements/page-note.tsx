@@ -1,6 +1,6 @@
 import storage from "../shared/storage.js";
 import { splitNote } from "../shared/format.js";
-import { sync } from "./utils/worker.js";
+import { sync } from "./utils/sync.js";
 import { useLocation, useRoute } from "preact-iso";
 import { Toolbar } from "./toolbar.js";
 import { NoteMetadata } from "./note-metadata.js";
@@ -10,7 +10,10 @@ import { useQuery } from "./utils/use-query.js";
 export function NotePage() {
     const { params } = useRoute();
     const location = useLocation();
-    const note = useQuery(() => storage.getNote(params["path"]), [params["path"]]);
+    const note = useQuery(
+        () => storage.getNote(params["path"]),
+        [params["path"]],
+    );
 
     if (!note) {
         return <Toolbar title="Note" />;

@@ -1,0 +1,47 @@
+import type { Note } from "../../shared/storage.js";
+import type { Action } from "../../worker/index.js";
+
+class WorkerRequestManager {
+    private _requests: Record<
+        string,
+        { resolve: (result: unknown) => void; reject: (error: unknown) => void }
+    >;
+    private _worker: Worker;
+
+    constructor() {
+        this._requests = {};
+        this._worker = new Worker(
+            new URL("../../worker/index.js", import.meta.url),
+            { type: "module" },
+        );
+        this._worker.addEventListener("message", (e) => {
+            const { id, result, error } = e.data;
+            const request = this._requests[id];
+            delete this._requests[id];
+            if (error) {
+                request.reject(error);
+            } else {
+                request.resolve(result);
+            }
+        });
+    }
+
+    request(action: Action, ...args: any[]) {
+        const id = Math.random();
+        return new Promise((resolve, reject) => {
+            this._requests[id] = { resolve, reject };
+            this._worker.postMessage({ id, action, args });
+        });
+    }
+}
+
+const instance = new WorkerRequestManager();
+
+export const markdownToHtml = (markdown: string): Promise<string> =>
+    instance.request("markdownToHtml", markdown) as Promise<string>;
+
+export const syncAll = (): Promise<void> =>
+    instance.request("syncAll") as Promise<void>;
+
+export const syncOne = (note: Note, oldNote: Note | undefined): Promise<void> =>
+    instance.request("syncOne", note, oldNote) as Promise<void>;

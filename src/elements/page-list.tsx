@@ -1,4 +1,4 @@
-import { sync } from "./utils/worker.js";
+import { sync } from "./utils/sync.js";
 import storage from "../shared/storage.js";
 import { Toolbar } from "./toolbar.js";
 import { useLocation } from "preact-iso";

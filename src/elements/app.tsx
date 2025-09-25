@@ -1,6 +1,6 @@
 import { computed } from "@preact/signals";
 import { shortDate } from "../shared/format.js";
-import { sync } from "./utils/worker.js";
+import { sync } from "./utils/sync.js";
 import {
     lazy,
     LocationProvider,

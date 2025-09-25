@@ -1,6 +1,6 @@
 import storage, { type Note } from "../shared/storage.js";
 import { splitNote } from "../shared/format.js";
-import { sync } from "./utils/worker.js";
+import { sync } from "./utils/sync.js";
 import { Toolbar } from "./toolbar.js";
 import { useLocation, useRoute } from "preact-iso";
 import { useQuery } from "./utils/use-query.js";

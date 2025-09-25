@@ -1,5 +1,5 @@
 import { useEffect, useRef } from "preact/hooks";
-import { markdownToHtml } from "./utils/worker.js";
+import { markdownToHtml } from "./utils/worker-request.js";
 
 interface Props {
     value: string;
