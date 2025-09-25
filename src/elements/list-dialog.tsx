@@ -13,7 +13,7 @@ export function ListDialogContent() {
             <ul>
                 {notes.value.map((note) => (
                     <li class="note-item" key={note.path}>
-                        <a href={`/view/${note.path}`}>
+                        <a href={`#/${note.path}`}>
                             <div>
                                 <h2>{note.title}</h2>
                                 <span class="path">{note.path}</span>
