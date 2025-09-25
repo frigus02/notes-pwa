@@ -12,15 +12,16 @@ export function serviceWorkerPlugin({ src, out }) {
             assets.push(
                 "/",
                 "/favicon.ico",
-                "/images/icon_144x144.png",
-                "/images/icon_152x152.png",
-                "/images/icon_168x168.png",
                 "/images/icon_16x16.png",
                 "/images/icon_192x192.png",
                 "/images/icon_32x32.png",
                 "/images/icon_48x48.png",
                 "/images/icon_72x72.png",
                 "/images/icon_96x96.png",
+                "/images/maskable_icon_192x192.png",
+                "/images/maskable_icon_48x48.png",
+                "/images/maskable_icon_72x72.png",
+                "/images/maskable_icon_96x96.png",
                 "/manifest.webmanifest",
             );
             assets.sort();
