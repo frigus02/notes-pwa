@@ -1,5 +1,4 @@
 import type { Action } from "../../worker/index.js";
-import { newId } from "../../shared/id.js";
 import type { Note } from "../../shared/storage.js";
 import { computed, signal } from "@preact/signals";
 
@@ -29,7 +28,7 @@ class WorkerRequestManager {
     }
 
     request(action: Action, ...args: any[]) {
-        const id = newId();
+        const id = Math.random();
         return new Promise((resolve, reject) => {
             this._requests[id] = { resolve, reject };
             this._worker.postMessage({ id, action, args });
