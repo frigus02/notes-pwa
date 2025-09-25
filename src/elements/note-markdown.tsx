@@ -13,5 +13,5 @@ export function NoteMarkdown({ value }: Props) {
         });
     }, [value]);
 
-    return <div ref={container} />;
+    return <div class="note-markdown" ref={container} />;
 }

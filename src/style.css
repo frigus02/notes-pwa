@@ -10,6 +10,7 @@
     --primary-background-color: #ffffff;
     --primary-text-color: #212121;
     --primary-text-color-on-dark: #ffffff;
+    --secondary-background-color: #eee;
     --secondary-text-color: #737373;
     --secondary-text-color-on-dark: #bcbcbc;
     --disabled-text-color: #9b9b9b;
@@ -174,4 +175,18 @@
     flex: 1;
     resize: none;
     box-sizing: border-box;
+}
+
+.note-markdown table {
+    border-collapse: collapse;
+}
+
+.note-markdown tr:nth-child(2n) {
+    background-color: var(--secondary-background-color);
+}
+
+.note-markdown th,
+.note-markdown td {
+    padding: 6px 12px;
+    border: 1px solid var(--divider-color);
 }
