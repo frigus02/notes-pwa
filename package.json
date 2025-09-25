@@ -4,7 +4,6 @@
     "@preact/signals": "^2.3.1",
     "marked": "16.3.0",
     "preact": "10.26.9",
-    "preact-iso": "^2.10.0",
     "reconcile-text": "0.5.0"
   },
   "devDependencies": {

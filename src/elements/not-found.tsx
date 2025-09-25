@@ -1,15 +1,15 @@
 import { DefaultActions } from "./default-actions";
 import { Toolbar } from "./toolbar";
 
-export function NotFoundPage() {
+export function NotFound() {
     return (
         <>
             <Toolbar title="Not found">
                 <DefaultActions />
             </Toolbar>
             <p class="not-found">
-                Whooops. This page does not exist. I suggest you{" "}
-                <a href="/">start again</a>.
+                Whooops. This note does not exist. I suggest you{" "}
+                <a href="#/">start again</a>.
             </p>
         </>
     );

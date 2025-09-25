@@ -13,7 +13,7 @@ export async function render(source: string): Promise<string> {
                 if (!token.href.startsWith("/")) {
                     token.href = "/" + token.href;
                 }
-                token.href = "/view" + token.href;
+                token.href = "#" + token.href;
             }
         },
     });

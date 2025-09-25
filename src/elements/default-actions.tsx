@@ -1,20 +1,18 @@
 import storage from "../shared/storage.js";
 import { sync } from "./utils/sync.js";
-import { useLocation } from "preact-iso";
 import { SettingsDialogContent } from "./settings-dialog.js";
 import { Dialog, useDialog } from "./utils/dialog.js";
 import { ListDialogContent } from "./list-dialog.js";
+import { open } from "./utils/path.js";
 
 export function DefaultActions() {
-    const location = useLocation();
-
     const syncNotes = () => {
         sync.all();
     };
 
     const createNote = async () => {
         const note = await storage.createNote();
-        location.route(`/view/${note.path}`);
+        open(note);
     };
 
     const [settingsDialogProps, openSettings] = useDialog();

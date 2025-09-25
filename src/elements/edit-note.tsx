@@ -1,23 +1,14 @@
 import storage, { type Note } from "../shared/storage.js";
 import { sync } from "./utils/sync.js";
 import { Toolbar } from "./toolbar.js";
-import { useLocation, useRoute } from "preact-iso";
-import { notes } from "./utils/notes.js";
-import { NotFoundPage } from "./page-404.js";
+import { type UiNote } from "./utils/notes.js";
 
-export function EditPage() {
-    const { params } = useRoute();
-    const location = useLocation();
-    const note = notes.value.find((note) => note.path === params["path"]);
+export interface Props {
+    note: UiNote;
+    onView: () => void;
+}
 
-    if (!note) {
-        return <NotFoundPage />;
-    }
-
-    const cancel = () => {
-        location.route(`/view/${note.path}`);
-    };
-
+export function EditNote({ note, onView }: Props) {
     const onSubmit = async (e: SubmitEvent) => {
         e.preventDefault();
         const data = new FormData(e.target as HTMLFormElement);
@@ -38,13 +29,13 @@ export function EditPage() {
             newNote = await storage.getNote(note.path);
             sync.one(newNote, undefined);
         }
-        location.route(`/view/${newNote.path}`);
+        onView();
     };
 
     return (
         <form class="note-edit" onSubmit={onSubmit}>
             <Toolbar title={note.title} subTitle={note.path}>
-                <button onClick={cancel}>Cancel</button>
+                <button onClick={onView}>Cancel</button>
                 <button type="submit">Save</button>
             </Toolbar>
             <div class="fields">
