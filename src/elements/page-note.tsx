@@ -12,8 +12,10 @@ import { DefaultActions } from "./default-actions.js";
 export function NotePage() {
     const { params } = useRoute();
     const location = useLocation();
-    const path = params["path"] ?? "README.md";
-    const note = notes.value.find((note) => note.path === path);
+    const note =
+        notes.value.find((note) => note.path === params["path"]) ??
+        notes.value.find((note) => note.path === "README.md") ??
+        notes.value.find((note) => note.path === "hello.md");
 
     if (!note) {
         return <NotFoundPage />;
