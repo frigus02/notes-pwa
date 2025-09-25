@@ -51,7 +51,7 @@ interface SyncSucess {
 type SyncResult = SyncError | SyncSucess;
 type SyncState = "idle" | "syncing";
 
-class Sync extends EventTarget {
+class Sync {
     private readonly _state = signal<SyncState>("idle");
     private readonly _lastResult = signal<SyncResult | undefined>(undefined);
 
@@ -79,15 +79,13 @@ class Sync extends EventTarget {
     private async start(type: "syncAll" | "syncOne", ...args: any[]) {
         try {
             this._state.value = "syncing";
-            this.dispatchEvent(new Event("sync-start"));
             await instance.request(type, ...args);
             this._lastResult.value = { type: "success", date: new Date() };
         } catch (e) {
-            const error = e instanceof Error ? e : new Error("error");
+            const error = e instanceof Error ? e : new Error(String(e));
             this._lastResult.value = { type: "error", date: new Date(), error };
         } finally {
             this._state.value = "idle";
-            this.dispatchEvent(new Event("sync-end"));
         }
     }
 }
