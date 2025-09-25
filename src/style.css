@@ -68,6 +68,13 @@
     font-size: small;
 }
 
+.notes-list header {
+    position: sticky;
+    top: 0;
+    display: flex;
+    justify-content: space-between;
+}
+
 .notes-list h1 {
     margin: 0 0 8px;
     font-size: 20px;
