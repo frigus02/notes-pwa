@@ -103,26 +103,9 @@
     background: rgba(0, 0, 0, 0.1);
 }
 
-.note-item h2 {
-    margin: 0;
-    font-size: 16px;
-    font-weight: normal;
-}
-
-.note-item a {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-}
-
-.note-item .path,
-.note-item .metadata {
+.note-item .path {
     color: var(--secondary-text-color);
     font-size: small;
-}
-
-.note-item .metadata {
-    text-align: right;
 }
 
 .note-details .content {

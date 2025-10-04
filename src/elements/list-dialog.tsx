@@ -1,5 +1,4 @@
 import { notes } from "./utils/notes.js";
-import { timeAgo } from "../shared/format.js";
 import { useRef } from "preact/hooks";
 
 export function ListDialogContent() {
@@ -19,14 +18,8 @@ export function ListDialogContent() {
                 {notes.value.map((note) => (
                     <li class="note-item" key={note.path}>
                         <a href={`#/${note.path}`} onClick={onClick}>
-                            <div>
-                                <h2>{note.title}</h2>
-                                <span class="path">{note.path}</span>
-                            </div>
-                            <div class="metadata">
-                                <div>{timeAgo(note.modified.getTime())}</div>
-                                <div>{note.syncState}</div>
-                            </div>
+                            <div>{note.title}</div>
+                            <div class="path">{note.path}</div>
                         </a>
                     </li>
                 ))}
