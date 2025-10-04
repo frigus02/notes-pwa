@@ -8,10 +8,8 @@ interface Props {
 export function NoteMetadata({ note }: Props) {
     return (
         <dl class="note-metadata">
-            <dt>Modified:</dt>
-            <dd>{timeAgo(note.modified.getTime())}</dd>
-            <dt>Sync:</dt>
-            <dd>{note.syncState}</dd>
+            <dt>Modified:</dt> <dd>{timeAgo(note.modified.getTime())}</dd>
+            <dt>Sync:</dt> <dd>{note.syncState}</dd>
         </dl>
     );
 }
