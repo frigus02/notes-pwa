@@ -4,6 +4,7 @@ import { SettingsDialogContent } from "./settings-dialog.js";
 import { Dialog, useDialog } from "./utils/dialog.js";
 import { ListDialogContent } from "./list-dialog.js";
 import { open } from "./utils/path.js";
+import { IconButton } from "./icon-button.js";
 
 export function DefaultActions() {
     const syncNotes = () => {
@@ -20,10 +21,10 @@ export function DefaultActions() {
 
     return (
         <>
-            <button onClick={syncNotes}>Sync</button>
-            <button onClick={createNote}>New note</button>
-            <button onClick={openList}>All</button>
-            <button onClick={openSettings}>Settings</button>
+            <IconButton icon="sync" onClick={syncNotes} />
+            <IconButton icon="add" onClick={createNote} />
+            <IconButton icon="list" onClick={openList} />
+            <IconButton icon="settings" onClick={openSettings} />
             <Dialog {...listDialogProps}>
                 <ListDialogContent />
             </Dialog>

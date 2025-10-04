@@ -3,6 +3,7 @@ import storage, { type Note } from "../shared/storage.js";
 import { sync } from "./utils/sync.js";
 import { Toolbar } from "./toolbar.js";
 import { type UiNote } from "./utils/notes.js";
+import { IconButton } from "./icon-button.js";
 
 export interface Props {
     note: UiNote;
@@ -36,8 +37,8 @@ export function EditNote({ note, onView }: Props) {
     return (
         <form class="note-edit" onSubmit={onSubmit}>
             <Toolbar title={note.title} subTitle={note.path}>
-                <button onClick={onView}>Cancel</button>
-                <button type="submit">Save</button>
+                <IconButton icon="cancel" onClick={onView} />
+                <IconButton icon="save" type="submit" />
             </Toolbar>
             <div class="fields">
                 <label>

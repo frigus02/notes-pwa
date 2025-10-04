@@ -18,6 +18,10 @@
     --error-color: #ff6500;
 }
 
+body {
+    margin: 0;
+}
+
 .sync-state {
     position: fixed;
     right: 0;
@@ -74,6 +78,7 @@
     top: 0;
     display: flex;
     justify-content: space-between;
+    align-items: center;
 }
 
 .notes-list h1 {
@@ -172,4 +177,17 @@
 .note-markdown td {
     padding: 6px 12px;
     border: 1px solid var(--divider-color);
+}
+
+.icon-button {
+    border: none;
+    background: none;
+    color: inherit;
+    padding: 0;
+    height: 48px;
+    width: 48px;
+}
+
+.icon-button:hover {
+    background: rgba(0, 0, 0, 0.1);
 }

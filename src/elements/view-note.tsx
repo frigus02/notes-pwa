@@ -7,6 +7,7 @@ import { NoteMarkdown } from "./note-markdown.js";
 import { type UiNote } from "./utils/notes.js";
 import { DefaultActions } from "./default-actions.js";
 import { open } from "./utils/path.js";
+import { IconButton } from "./icon-button.js";
 
 export interface Props {
     note: UiNote;
@@ -28,8 +29,8 @@ export function ViewNote({ note, onEdit }: Props) {
         <div class="note-details">
             <Toolbar title={note.title} subTitle={note.path}>
                 <DefaultActions />
-                <button onClick={onEdit}>Edit</button>
-                <button onClick={deleteNote}>Delete</button>
+                <IconButton icon="edit" onClick={onEdit} />
+                <IconButton icon="delete" onClick={deleteNote} />
             </Toolbar>
             <div class="content">
                 <NoteMetadata note={note}></NoteMetadata>

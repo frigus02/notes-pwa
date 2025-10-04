@@ -1,3 +1,4 @@
+import { IconButton } from "./icon-button.js";
 import { notes } from "./utils/notes.js";
 import { useRef } from "preact/hooks";
 
@@ -11,7 +12,7 @@ export function ListDialogContent() {
             <header>
                 <h1>Notes</h1>
                 <form method="dialog" ref={form}>
-                    <input type="submit" value="Close" />
+                    <IconButton icon="close" type="submit" />
                 </form>
             </header>
             <ul>
