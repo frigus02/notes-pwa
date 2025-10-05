@@ -4,7 +4,7 @@ import { NotFound } from "./not-found.js";
 import { useState } from "preact/hooks";
 import { path, open } from "./utils/path.js";
 import { ViewNote } from "./view-note.js";
-import { EditNote } from "./edit-note.js";
+import { lazy } from "./utils/lazy.js";
 
 function getNote() {
     const p = path.value;
@@ -33,6 +33,8 @@ function getNote() {
 
     return undefined;
 }
+
+const EditNote = lazy(() => import("./edit-note.js").then((m) => m.EditNote));
 
 export function Note() {
     const note = getNote();

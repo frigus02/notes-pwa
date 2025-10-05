@@ -1,7 +1,9 @@
 {
   "private": true,
   "dependencies": {
+    "@codemirror/lang-markdown": "6.4.0",
     "@preact/signals": "^2.3.1",
+    "codemirror": "6.0.2",
     "marked": "16.3.0",
     "preact": "10.26.9",
     "reconcile-text": "0.5.0"

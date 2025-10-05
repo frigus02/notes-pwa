@@ -181,10 +181,9 @@ body {
     flex: 1;
 }
 
-.note-edit textarea {
+.note-edit .editor {
     flex: 1;
-    resize: none;
-    box-sizing: border-box;
+    display: grid;
 }
 
 .note-markdown table {

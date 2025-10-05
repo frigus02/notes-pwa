@@ -4,6 +4,7 @@ import { sync } from "./utils/sync.js";
 import { Toolbar } from "./toolbar.js";
 import { type UiNote } from "./utils/notes.js";
 import { IconButton } from "./icon-button.js";
+import { Editor } from "./editor.js";
 
 export interface Props {
     note: UiNote;
@@ -53,11 +54,7 @@ export function EditNote({ note, onView }: Props) {
                 <label>
                     Path: <input name="path" defaultValue={note.path} />
                 </label>
-                <textarea
-                    aria-label="Note content"
-                    name="body"
-                    defaultValue={note.body}
-                ></textarea>
+                <Editor name="body" defaultValue={note.body} />
             </div>
         </form>
     );
