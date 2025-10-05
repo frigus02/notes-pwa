@@ -8,6 +8,12 @@ export interface Note {
     lastSync: { body: string; sha: string } | undefined;
 }
 
+export interface NewNote {
+    path: string;
+    body: string;
+    lastSync?: { body: string; sha: string } | undefined;
+}
+
 const NOTES: Array<Pick<Note, "path" | "body">> = [
     {
         path: "hello.md",
@@ -101,10 +107,8 @@ class Storage {
         });
     }
 
-    async createNote(params: Partial<Note> = {}): Promise<Note> {
+    async createNote(params: NewNote): Promise<Note> {
         const note: Note = {
-            path: "new.md",
-            body: "# New note",
             deleted: false,
             lastSync: undefined,
             ...params,

@@ -8,7 +8,7 @@ export interface UiNote {
     readonly path: string;
     readonly body: string;
     readonly modified: Date;
-    readonly syncState: string;
+    readonly syncState: "synced" | "modified" | "new";
 }
 
 const _notes = signal<UiNote[]>([]);

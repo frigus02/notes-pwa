@@ -7,17 +7,26 @@ import { IconButton } from "./icon-button.js";
 
 export interface Props {
     note: UiNote;
-    onView: () => void;
+    onView: (newNote: Note | UiNote | undefined) => void;
 }
 
 export function EditNote({ note, onView }: Props) {
+    const onCancel = () => {
+        onView(note.syncState === "new" ? undefined : note);
+    };
     const onSubmit = async (e: JSX.TargetedSubmitEvent<HTMLFormElement>) => {
         e.preventDefault();
         const data = new FormData(e.currentTarget);
         const body = (data.get("body") as string | null) ?? "";
         const path = (data.get("path") as string | null) ?? "";
         let newNote: Note;
-        if (path !== note.path) {
+        if (note.syncState === "new") {
+            newNote = await storage.createNote({
+                path,
+                body,
+            });
+            sync.one(newNote, undefined);
+        } else if (path !== note.path) {
             await storage.deleteNote(note.path);
             newNote = await storage.createNote({
                 path,
@@ -31,19 +40,18 @@ export function EditNote({ note, onView }: Props) {
             newNote = await storage.getNote(note.path);
             sync.one(newNote, undefined);
         }
-        onView();
+        onView(newNote);
     };
 
     return (
         <form class="note-edit" onSubmit={onSubmit}>
             <Toolbar title={note.title} subTitle={note.path}>
-                <IconButton icon="cancel" onClick={onView} />
+                <IconButton icon="cancel" onClick={onCancel} />
                 <IconButton icon="save" type="submit" />
             </Toolbar>
             <div class="fields">
                 <label>
-                    Path:
-                    <input name="path" defaultValue={note.path} />
+                    Path: <input name="path" defaultValue={note.path} />
                 </label>
                 <textarea
                     aria-label="Note content"

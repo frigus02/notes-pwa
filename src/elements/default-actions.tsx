@@ -1,4 +1,3 @@
-import storage from "../shared/storage.js";
 import { sync } from "./utils/sync.js";
 import { SettingsDialogContent } from "./settings-dialog.js";
 import { Dialog, useDialog } from "./utils/dialog.js";
@@ -12,8 +11,7 @@ export function DefaultActions() {
     };
 
     const createNote = async () => {
-        const note = await storage.createNote();
-        open(note);
+        open("new");
     };
 
     const [settingsDialogProps, openSettings] = useDialog();

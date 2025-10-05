@@ -1,24 +1,56 @@
 import { type Note } from "../shared/storage.js";
-import { notes } from "./utils/notes.js";
+import { notes, type UiNote } from "./utils/notes.js";
 import { NotFound } from "./not-found.js";
 import { useState } from "preact/hooks";
-import { path } from "./utils/path.js";
+import { path, open } from "./utils/path.js";
 import { ViewNote } from "./view-note.js";
 import { EditNote } from "./edit-note.js";
 
-export function Note() {
-    const note =
-        notes.value.find((note) => note.path === path.value) ??
-        notes.value.find((note) => note.path === "README.md") ??
-        notes.value.find((note) => note.path === "hello.md");
+function getNote() {
+    const p = path.value;
+    if (!p) return undefined;
 
+    if (p.type === "note") {
+        if (p.value === "") {
+            return (
+                notes.value.find((note) => note.path === "README.md") ??
+                notes.value.find((note) => note.path === "hello.md")
+            );
+        }
+
+        return notes.value.find((note) => note.path === p.value);
+    }
+
+    if (p.value === "new") {
+        return {
+            title: "New note",
+            path: "new.md",
+            body: "",
+            modified: new Date(),
+            syncState: "new",
+        } satisfies UiNote;
+    }
+
+    return undefined;
+}
+
+export function Note() {
+    const note = getNote();
     if (!note) {
         return <NotFound />;
     }
 
     const [isEditing, setIsEditing] = useState(false);
-    if (isEditing) {
-        return <EditNote note={note} onView={() => setIsEditing(false)} />;
+    if (isEditing || note.syncState === "new") {
+        return (
+            <EditNote
+                note={note}
+                onView={(newNote) => {
+                    setIsEditing(false);
+                    open(newNote);
+                }}
+            />
+        );
     }
 
     return <ViewNote note={note} onEdit={() => setIsEditing(true)} />;
