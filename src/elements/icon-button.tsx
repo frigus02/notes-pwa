@@ -2,15 +2,13 @@ import type { JSX } from "preact/jsx-runtime";
 
 export interface Props extends JSX.ButtonHTMLAttributes {
     icon:
-        | "add"
         | "cancel"
         | "close"
         | "delete"
         | "edit"
         | "list"
-        | "save"
-        | "settings"
-        | "sync";
+        | "more_vert"
+        | "save";
 }
 
 export function IconButton({ icon, ...props }: Props) {

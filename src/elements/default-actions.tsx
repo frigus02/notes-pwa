@@ -21,10 +21,13 @@ export function DefaultActions() {
 
     return (
         <>
-            <IconButton icon="sync" onClick={syncNotes} />
-            <IconButton icon="add" onClick={createNote} />
             <IconButton icon="list" onClick={openList} />
-            <IconButton icon="settings" onClick={openSettings} />
+            <IconButton icon="more_vert" popovertarget="toolbar-menu" />
+            <div id="toolbar-menu" popover>
+                <button onClick={createNote}>New note</button>
+                <button onClick={syncNotes}>Sync</button>
+                <button onClick={openSettings}>Settings</button>
+            </div>
             <Dialog {...listDialogProps}>
                 <ListDialogContent />
             </Dialog>

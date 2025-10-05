@@ -28,9 +28,9 @@ export function ViewNote({ note, onEdit }: Props) {
     return (
         <div class="note-details">
             <Toolbar title={note.title} subTitle={note.path}>
-                <DefaultActions />
                 <IconButton icon="edit" onClick={onEdit} />
                 <IconButton icon="delete" onClick={deleteNote} />
+                <DefaultActions />
             </Toolbar>
             <div class="content">
                 <NoteMetadata note={note}></NoteMetadata>
