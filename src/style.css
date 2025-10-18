@@ -188,6 +188,7 @@ body {
 
 .note-markdown table {
     border-collapse: collapse;
+    margin: 16px 0;
 }
 
 .note-markdown tr:nth-child(2n) {
