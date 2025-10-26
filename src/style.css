@@ -183,7 +183,12 @@ body {
 
 .note-edit .editor {
     flex: 1;
-    display: grid;
+    position: relative;
+}
+
+.note-edit .editor .cm-editor {
+    position: absolute;
+    inset: 0;
 }
 
 .note-markdown table {
