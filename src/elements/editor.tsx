@@ -92,6 +92,7 @@ function linkCompletions(context: CompletionContext): CompletionResult | null {
     };
 }
 
+const MIN_COLUMN_SIZE = " --- ".length;
 const TABLE_TYPE = "Table";
 const DELIMITER_TYPE = "TableDelimiter";
 const HEADER_TYPE = "TableHeader";
@@ -171,8 +172,6 @@ function formatTableTransactionFilter(
             getCellBounds,
         );
 
-        // min 5 for header delimiter: | --- |
-        const MIN_COLUMN_SIZE = 5;
         const columnSizes = Array.from<number>({
             length: cells[0].length,
         }).fill(MIN_COLUMN_SIZE);
