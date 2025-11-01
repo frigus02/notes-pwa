@@ -225,6 +225,41 @@ function formatTableTransactionFilter(
                 }
             }
         }
+
+        const delimiterRow = table.getChild(DELIMITER_TYPE)!;
+        const delimiterRowText = doc.sliceString(
+            delimiterRow.from,
+            delimiterRow.to,
+        );
+        if (
+            !delimiterRowText.startsWith("|") ||
+            !delimiterRowText.endsWith("|")
+        ) {
+            // TODO: Support tables without start and end column delimiter.
+            return;
+        }
+        const formattedDelimiter =
+            "| " +
+            delimiterRowText
+                .slice(1, -1)
+                .split("|")
+                .map((d, i) => {
+                    d = d.trim();
+                    const start = d[0] ?? "-";
+                    const end = d.at(-1) ?? "-";
+                    return start + "-".repeat(columnSizes[i] - 4) + end;
+                })
+                .join(" | ") +
+            " |";
+        if (delimiterRowText !== formattedDelimiter) {
+            result.push({
+                changes: {
+                    from: delimiterRow.from,
+                    to: delimiterRow.to,
+                    insert: formattedDelimiter,
+                },
+            });
+        }
     });
     return result;
 }
