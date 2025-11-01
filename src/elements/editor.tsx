@@ -132,6 +132,16 @@ function formatTableTransactionFilter(
         const lengthChange = toB - fromB - (toA - fromA);
         function getCellBounds(row: SyntaxNode) {
             const delimiters = row.getChildren(DELIMITER_TYPE);
+            const line = doc.lineAt(row.from);
+            if (delimiters.length === 0) return [];
+            if (
+                delimiters[0].from !== line.from ||
+                delimiters.at(-1)!.to !== line.to
+            ) {
+                // TODO: Support tables without start and end column delimiter.
+                return [];
+            }
+
             const cells = [];
             for (let i = 1; i < delimiters.length; i++) {
                 const from = delimiters[i - 1].to;
