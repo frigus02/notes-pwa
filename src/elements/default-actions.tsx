@@ -5,7 +5,11 @@ import { ListDialogContent } from "./list-dialog.js";
 import { open } from "./utils/path.js";
 import { IconButton } from "./icon-button.js";
 
-export function DefaultActions() {
+export interface Props {
+    moreActions?: Record<string, () => void>;
+}
+
+export function DefaultActions({ moreActions = {} }: Props) {
     const syncNotes = () => {
         sync.all();
     };
@@ -22,6 +26,11 @@ export function DefaultActions() {
             <IconButton icon="list" onClick={openList} />
             <IconButton icon="more_vert" popovertarget="toolbar-menu" />
             <div id="toolbar-menu" popover>
+                {Object.entries(moreActions).map(([text, onClick]) => (
+                    <button key={text} onClick={onClick}>
+                        {text}
+                    </button>
+                ))}
                 <button onClick={createNote}>New note</button>
                 <button onClick={syncNotes}>Sync</button>
                 <button onClick={openSettings}>Settings</button>

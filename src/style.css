@@ -49,6 +49,16 @@ body {
     align-items: center;
 }
 
+.toolbar-title {
+    overflow: hidden;
+}
+
+.toolbar-title > * {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
 .toolbar h1 {
     margin: 0;
     font-size: 20px;
@@ -56,6 +66,10 @@ body {
 
 .toolbar .sub {
     font-size: small;
+}
+
+.toolbar-actions {
+    flex-shrink: 0;
 }
 
 .toolbar [popover] {
