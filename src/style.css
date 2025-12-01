@@ -75,8 +75,7 @@ body {
 .toolbar [popover] {
     margin: 0;
     padding: 0;
-    inset: auto;
-    right: 8px;
+    inset: 52px 8px auto auto;
     border: none;
     box-shadow: 0 3px 3px var(--divider-color);
 }
